@@ -1,0 +1,14 @@
+# Reuses the exact artifacts already built/tested in this job; runtime topology is unchanged.
+services:
+  backend:
+    build: {context: ., dockerfile: Dockerfile.ci, target: backend}
+  orders:
+    build: {context: ., dockerfile: Dockerfile.ci, target: demo}
+  payments:
+    build: {context: ., dockerfile: Dockerfile.ci, target: demo}
+  inventory:
+    build: {context: ., dockerfile: Dockerfile.ci, target: demo}
+  recovery-sandbox:
+    build: {context: ., dockerfile: Dockerfile.ci, target: demo}
+  frontend:
+    build: {context: ., dockerfile: Dockerfile.ci, target: frontend}

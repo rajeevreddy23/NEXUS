@@ -1,0 +1,11 @@
+*
+!backend/
+!backend/target/
+!backend/target/backend-1.0.0.jar
+!demo/
+!demo/target/
+!demo/target/demo-1.0.0.jar
+!frontend/
+!frontend/.next/
+!frontend/.next/standalone/**
+!frontend/.next/static/**

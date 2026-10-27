@@ -38,3 +38,9 @@
 **Memory is empty:** Recover or close a diagnosed incident first, then search specific terms. A record without a successful embedding uses lexical retrieval until reindexed.
 
 **Loki/Jaeger missing:** Inspect Collector exporter logs and OTLP agent configuration. Missing telemetry must remain labelled unavailable; do not substitute UI fixtures for the live demonstration.
+
+
+
+## Reproducible cloud acceptance
+
+Use the private GitHub Actions workflow or the Linux procedure in `cloud-verification.md`. The live API acceptance script is separate from the five UI fixtures. Its `evidence/acceptance.json` contains actual assertion outcomes and timestamps. `playwright.live.config.ts` signs into the real Compose application and captures a post-login screenshot without retaining an authentication trace. The runner is destroyed after testing and is not a public demo URL.

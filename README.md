@@ -22,6 +22,12 @@ First startup downloads images, compiles Java and builds Next.js. Give the servi
 
 Stop with `docker compose down`. Database and telemetry volumes remain. Back up incident data with `docker compose exec -T postgres pg_dump -U nexus nexus` before changing persistent storage.
 
+## Cloud and Linux verification
+
+The private repository includes a bounded GitHub Actions workflow that runs Java/PGvector checks, the frontend suite, the complete isolated Compose stack and real API/browser acceptance. See [cloud verification](docs/cloud-verification.md) and the [verification ledger](docs/verification.md) for measured status. A workflow definition or queued job is not deployment proof. GitHub runners are ephemeral; no permanent hosting is provisioned.
+
+On Linux, `node scripts/setup.mjs` generates a private `.env` without printing credentials. Then run `docker compose up --build -d` and `node scripts/cloud-acceptance.mjs` in a disposable checkout.
+
 ## Demonstrate the full cycle
 
 1. Wait for all three services to pass probes in Overview.
@@ -94,3 +100,4 @@ See [architecture](docs/architecture.md), [requirements traceability](docs/requi
 This implementation targets one controller, one developer account, one observer account, and an isolated three-service demonstration. Runtime recovery is limited to clearing controlled demo faults. It does not restart arbitrary containers, execute generated commands, scale services, repair application code, or operate a production cluster. Sandbox tests establish behavior in a simplified replica; they do not prove that production recovery will work. There is no automatic rollback that reintroduces a failure. The prior fault mode and manual demo rollback instructions are retained for inspection.
 
 Sessions reside in the backend process and expire on restart. AI model calls are remote when enabled. Controller restarts during execution mark the outcome uncertain; actions are never replayed. Long-running validation/execution occurs synchronously and is bounded for this local demo. Multi-controller deployment, distributed execution leases, SSO, secret rotation, immutable external audit storage and production sandbox equivalence require further work.
+

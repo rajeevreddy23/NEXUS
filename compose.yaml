@@ -54,6 +54,7 @@ services:
       PROMETHEUS_URL: http://prometheus:9090
       LOKI_URL: http://loki:3100
       JAEGER_URL: http://jaeger:16686
+      COLLECTORS_ENABLED: ${COLLECTORS_ENABLED:-true}
       AI_ENABLED: ${AI_ENABLED:-false}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       CHAT_MODEL: ${CHAT_MODEL:-nvidia/nemotron-3-ultra-550b-a55b:free}
@@ -76,7 +77,7 @@ services:
     environment: {BACKEND_URL: 'http://backend:8080'}
     ports: ['127.0.0.1:3000:3000']
     depends_on: [backend]
-    networks: [control]
+    networks: [control, web-edge]
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
@@ -129,20 +130,20 @@ services:
     image: prom/prometheus:v3.7.2
     volumes: ['./infra/prometheus.yml:/etc/prometheus/prometheus.yml:ro',prometheus-data:/prometheus]
     ports: ['127.0.0.1:9090:9090']
-    networks: [telemetry]
+    networks: [telemetry, monitor-edge]
     restart: unless-stopped
   jaeger:
     image: jaegertracing/all-in-one:1.76.0
     environment: {COLLECTOR_OTLP_ENABLED: 'true'}
     ports: ['127.0.0.1:16686:16686']
-    networks: [telemetry]
+    networks: [telemetry, monitor-edge]
     restart: unless-stopped
   loki:
     image: grafana/loki:3.5.7
     command: [-config.file=/etc/loki/config.yaml]
     volumes: ['./infra/loki.yml:/etc/loki/config.yaml:ro',loki-data:/loki]
     ports: ['127.0.0.1:3100:3100']
-    networks: [telemetry]
+    networks: [telemetry, monitor-edge]
     restart: unless-stopped
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.137.0
@@ -157,8 +158,11 @@ networks:
   sandbox-net: {internal: true}
   telemetry: {internal: true}
   egress: {}
+  web-edge: {}
+  monitor-edge: {}
 volumes:
   nexus-db: {}
   demo-db: {}
   prometheus-data: {}
   loki-data: {}
+

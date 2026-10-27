@@ -16,7 +16,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '24', cache: npm, cache-dependency-path: frontend/package-lock.json}
       - run: node scripts/setup.mjs
-      - run: docker info && mvn -B verify
+      - name: Use verified runtime artifacts
+        run: echo 'COMPOSE_FILE=compose.yaml:compose.ci.yaml' >> "$GITHUB_ENV"
+      - run: docker info && mvn -B verify && node scripts/test-summary.mjs
       - run: npm ci && npm run build && npx playwright install --with-deps chromium && npm test
         working-directory: frontend
       - name: Full isolated stack
@@ -28,6 +30,21 @@ jobs:
       - name: Real browser against Compose
         run: npx playwright test --config playwright.live.config.ts
         working-directory: frontend
+      - name: One explicitly requested free AI RAG scenario
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[nexus-ai]')
+        timeout-minutes: 5
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AI_ENABLED: 'true'
+          COLLECTORS_ENABLED: 'false'
+        run: |
+          test -n "$OPENAI_API_KEY"
+          docker compose exec -T postgres psql -U nexus -d nexus -v ON_ERROR_STOP=1 -c "delete from memory where id<>(select id from memory order by created_at limit 1)"
+          docker compose up -d --no-deps --force-recreate backend
+          node scripts/cloud-ai.mjs
+      - name: Redacted failure diagnostics
+        if: failure()
+        run: node scripts/diagnostics.mjs
       - name: Remove ephemeral containers and data
         if: always()
         run: docker compose down -v --remove-orphans
