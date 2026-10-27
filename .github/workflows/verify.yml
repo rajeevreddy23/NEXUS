@@ -15,6 +15,7 @@ jobs:
         with: {distribution: temurin, java-version: '21', cache: maven}
       - uses: actions/setup-node@v4
         with: {node-version: '24', cache: npm, cache-dependency-path: frontend/package-lock.json}
+      - run: node scripts/setup.mjs
       - run: docker info && mvn -B verify
       - run: npm ci && npm run build && npx playwright install --with-deps chromium && npm test
         working-directory: frontend
@@ -24,6 +25,9 @@ jobs:
           docker compose config --quiet
           docker compose up --build -d
           node scripts/cloud-acceptance.mjs
+      - name: Real browser against Compose
+        run: npx playwright test --config playwright.live.config.ts
+        working-directory: frontend
       - name: Remove ephemeral containers and data
         if: always()
         run: docker compose down -v --remove-orphans

@@ -5,9 +5,9 @@ import java.time.*;
 import java.util.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
-@Repository
+@Component
 class IncidentStore {
  final JdbcTemplate db; final Json json; final TransactionTemplate tx;
  IncidentStore(JdbcTemplate db,Json json,TransactionTemplate tx){this.db=db;this.json=json;this.tx=tx;}
@@ -31,3 +31,4 @@ class IncidentStore {
  List<Map<String,Object>> samples(){return db.queryForList("select service,at,data::text as data from sample where at>now()-interval '30 minutes' order by at desc limit 300");}
  void cleanup(){db.update("delete from sample where at<now()-interval '7 days'");}
 }
+
