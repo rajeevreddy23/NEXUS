@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-27T18:57:36.369Z",
+  "incidentId": "beb84c71-6ee1-4473-b1b6-eb33ba5fcd3f",
+  "mode": "SPRING_AI_ASSISTED",
+  "citedRoles": 3,
+  "historicalVectorContext": true,
+  "persistedVectorRetrieval": true,
+  "verifiedRecovery": true,
+  "chatModel": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "embeddingModel": "nvidia/nemotron-3.5-embed-1b:free"
+}

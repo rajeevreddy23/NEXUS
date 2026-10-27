@@ -1,0 +1,68 @@
+[
+  {
+    "check": "authentication-role-csrf",
+    "at": "2026-10-27T18:42:38.222Z"
+  },
+  {
+    "check": "healthy-startup-baseline",
+    "at": "2026-10-27T18:42:45.351Z"
+  },
+  {
+    "check": "recovery-ERROR",
+    "at": "2026-10-27T18:42:50.708Z",
+    "incidentId": "f8be274d-38f8-4f40-b958-a54278acb80e",
+    "durationMs": 5357,
+    "detectionMs": 1524,
+    "recoveryMs": 1565,
+    "correctRoot": true,
+    "success": true
+  },
+  {
+    "check": "recovery-LATENCY",
+    "at": "2026-10-27T18:43:13.031Z",
+    "incidentId": "5b519519-761e-4767-97fc-e682737181f6",
+    "durationMs": 21327,
+    "detectionMs": 10334,
+    "recoveryMs": 1241,
+    "correctRoot": true,
+    "success": true
+  },
+  {
+    "check": "recovery-DB_POOL",
+    "at": "2026-10-27T18:43:21.843Z",
+    "incidentId": "0ecf1ed5-1473-49e9-a8f2-af21d809451a",
+    "durationMs": 8163,
+    "detectionMs": 5000,
+    "recoveryMs": 1077,
+    "correctRoot": true,
+    "success": true
+  },
+  {
+    "check": "expired-validation-rejected-without-reset",
+    "at": "2026-10-27T18:43:26.983Z"
+  },
+  {
+    "check": "changed-live-state-rejected-without-reset",
+    "at": "2026-10-27T18:43:37.551Z"
+  },
+  {
+    "check": "prometheus-four-live-targets",
+    "at": "2026-10-27T18:43:37.571Z"
+  },
+  {
+    "check": "prometheus-real-micrometer-series",
+    "at": "2026-10-27T18:43:37.575Z"
+  },
+  {
+    "check": "loki-nonempty-real-logs",
+    "at": "2026-10-27T18:43:37.597Z"
+  },
+  {
+    "check": "jaeger-nonempty-real-spans",
+    "at": "2026-10-27T18:43:37.645Z"
+  },
+  {
+    "check": "complete",
+    "at": "2026-10-27T18:43:37.646Z"
+  }
+]

@@ -27,7 +27,7 @@ The developer's authorization for this isolated acceptance run supplies approval
 
 Evidence contains incident IDs, timing and assertions only. Browser screenshots are captured after sign-in; browser traces are disabled to avoid retaining submitted passwords. Raw `.env`, authentication requests, cookies and provider keys must not be uploaded. CI artifacts expire after three days; copy measured summaries into versioned documentation after review.
 
-A successful basic run does not establish AI quality, vector retrieval, expiry/live-state race handling or the full repeated evaluation matrix. Those require the separately recorded checks. Provider tests remain deliberately opt-in and must use the encrypted Actions secret without logging it.
+The full script now checks expiry and changed live-state rejection as well. The final optional AI scenario separately established vector persistence/retrieval and accepted cited interpretations. These checks do not establish semantic AI quality, distributed races or the full repeated evaluation matrix. See the verification ledger for measured runs. Provider tests remain deliberately opt-in and must use the encrypted Actions secret without logging it.
 
 ## First runtime defect
 
@@ -40,3 +40,7 @@ The optional AI scenario uses the existing disposable database and retains one r
 ## Host port correction
 
 The original Compose attached every published UI/collector service only to internal networks. The first complete container build succeeded, but the host API client could not connect to port 3000. Published user interfaces now have explicit bridge edge networks; all published ports remain bound to 127.0.0.1. Demo, control and sandbox networks remain internal, with the sandbox database on its own isolated network. This change does not publish backend, database, demo-control or OTLP ports. CI can use `compose.ci.yaml` to package the exact Java jars and Next.js standalone output already built/tested in the same job, avoiding duplicate compilation. The normal source-building Dockerfiles remain available.
+
+## Final result
+
+Run [40564112317](https://github.com/rajeevreddy23/NEXUS/actions/runs/40564112317) passed. Its targeted AI scope repeated a fresh seed recovery and collector checks, the populated browser graph, and one three-role Spring AI/RAG/approved-recovery scenario. Full three-fault and negative-approval evidence is retained from run 40561946483. The model-output failure and fix are recorded rather than erased. Use a full unmarked push or workflow_dispatch for the complete deterministic suite; `[ai-only]` is an explicit targeted check mode, and `[nexus-ai]` enables the bounded secret-backed scenario only on a main-branch push. It is not enabled on pull requests.

@@ -36,7 +36,7 @@ The orchestrator is ordinary Java with explicit typed inputs/outputs, rather tha
 
 The graph follows the configured `orders → payments → inventory` topology. The probable failing dependency is selected by current snapshots, and an explicitly reported supported demo fault provides a candidate cause. Confidence values are fixed explanatory heuristics (0.8 for a recognized fault, 0.25 for insufficient evidence), not calibrated probabilities. For unrecognized faults, the plan is `MANUAL_INVESTIGATION` and no recovery can execute.
 
-AI interpretations cannot change the deterministic plan or safety policy. Exact citation validation rejects missing/unknown/unavailable evidence references, but does not entail semantic validation. Prompt injection is addressed with untrusted-data instructions, bounded context and withholding tools; residual model errors are visible as unverified interpretations.
+AI interpretations cannot change the deterministic plan or safety policy. Each model request receives only available evidence with short citation aliases (E1, E2, …). Prior findings use the same alias map. The response must cite those aliases; the controller validates them and maps them back to the original immutable evidence IDs for storage and UI links. Historical incident IDs and IDs inside payload text are not citation aliases. Missing, unknown or unavailable references are rejected. This identity check does not entail semantic validation. Prompt injection is addressed with untrusted-data instructions, bounded context and withholding tools; residual model errors are visible as unverified interpretations.
 
 ## Incident state machine
 
@@ -72,3 +72,4 @@ Post-action verification makes three successful application calls under 1200 ms 
 `incident` stores evidence, diagnosis, validation and outcome JSONB plus revision and approval metadata. `audit` stores actor, event, detail and timestamp. `sample` retains seven days of samples; the API returns the latest 300 within 30 minutes. `memory` stores bounded incident summaries and optional 1536-dimensional vectors with model identity and an HNSW cosine index. Full evidence/audit remain on the incident.
 
 Spring Security uses BCrypt hashes, process-local sessions, session fixation protection, same-site HttpOnly session cookies, CSRF protection on mutations and developer/observer roles. TLS deployments must set COOKIE_SECURE=true and terminate HTTPS appropriately. Local Compose intentionally serves HTTP on loopback. There are no public service registration or arbitrary URL ingestion APIs. Telemetry backends are loopback-only/local and do not include a production authentication layer. Audit records are durable but mutable by database administrators; no tamper-evidence is claimed.
+

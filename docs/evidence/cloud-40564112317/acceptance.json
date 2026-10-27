@@ -1,0 +1,40 @@
+[
+  {
+    "check": "authentication-role-csrf",
+    "at": "2026-10-27T18:56:39.558Z"
+  },
+  {
+    "check": "healthy-startup-baseline",
+    "at": "2026-10-27T18:56:46.642Z"
+  },
+  {
+    "check": "recovery-ERROR",
+    "at": "2026-10-27T18:56:51.604Z",
+    "incidentId": "39fd838d-3fcb-4290-a4a5-ea04a96b4e9f",
+    "durationMs": 4961,
+    "detectionMs": 1157,
+    "recoveryMs": 1611,
+    "correctRoot": true,
+    "success": true
+  },
+  {
+    "check": "prometheus-four-live-targets",
+    "at": "2026-10-27T18:56:52.355Z"
+  },
+  {
+    "check": "prometheus-real-micrometer-series",
+    "at": "2026-10-27T18:56:52.367Z"
+  },
+  {
+    "check": "loki-nonempty-real-logs",
+    "at": "2026-10-27T18:56:52.391Z"
+  },
+  {
+    "check": "jaeger-nonempty-real-spans",
+    "at": "2026-10-27T18:56:52.432Z"
+  },
+  {
+    "check": "complete",
+    "at": "2026-10-27T18:56:52.433Z"
+  }
+]

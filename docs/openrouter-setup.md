@@ -39,3 +39,9 @@ If the stack was already running, recreate the backend after changing `.env`. Re
 Successful provider requests establish connection and response compatibility. They do not establish live PGvector retrieval, collector delivery, application authentication or recovery in the Compose deployment; those still require the full stack. Quotas or unavailable providers result in a labelled deterministic/text-search fallback, not fabricated AI success.
 
 References: [OpenRouter embeddings API](https://openrouter.ai/docs/api/reference/embeddings), [Nemotron chat](https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b:free), [Nemotron embeddings](https://openrouter.ai/nvidia/nemotron-3.5-embed-1b:free).
+
+
+
+## Investigation citations
+
+The full incident prompt uses per-request aliases for available evidence, mapped back to immutable database evidence IDs after strict validation. The first cloud model investigations returned parseable JSON but referenced IDs outside the permitted evidence set; they were correctly labelled fallback rather than counted as successful AI. The prompt/validator contract now excludes unavailable sources and states the permitted aliases explicitly. Safe diagnostics expose exception categories and known validation reasons, never provider response bodies, headers or keys. Successful vector retrieval alone is not proof of accepted model reasoning.

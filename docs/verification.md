@@ -1,5 +1,34 @@
 # Verification ledger
 
+## Latest cloud status
+
+**Required controlled-demo runtime acceptance is verified.** The final targeted workflow [40564112317](https://github.com/rajeevreddy23/NEXUS/actions/runs/40564112317) passed on code `28ed2cc4d57e6298df3b5f8697dc269144ecb01f`. All containers and volumes were removed afterward. The repository remains private; no permanent hosting was created.
+
+| Cloud check | Measured result | Evidence |
+|---|---|---|
+| Full Java suite with Docker PGvector | 30 passed, 1 opt-in provider test skipped | `evidence/cloud-40561946483/java.json`; actual PGvector test executed |
+| Next.js production build and UI fixtures | Build passed; 5 fixture tests passed | Full and final run logs |
+| Real browser after API refresh | 1 passed; three operational nodes, two edges; screenshot inspected | `evidence/cloud-40564112317/live-console.png` |
+| Full Compose with real PostgreSQL migration | Passed | Full deterministic run; source-building containers also built in preceding run |
+| Authentication, observer role, CSRF | Passed through real Next.js/Spring APIs | Full acceptance JSON |
+| ERROR, LATENCY, actual DB_POOL | One inventory trial each passed detection, diagnosis, isolated validation, approved reset and health checks | `evidence/cloud-40561946483/acceptance.json` |
+| Unvalidated, unconfirmed, stale-revision, replayed approvals | Rejected | Full acceptance script assertions |
+| Expired validation and changed live state | Rejected without resetting the active fault | Full acceptance JSON; timestamp ageing is a disposable DB test fixture |
+| Prometheus/Micrometer | Four up targets; nonempty request and JVM series | Both acceptance JSON files |
+| Loki / Jaeger | Nonempty actual logs / trace spans | Both acceptance JSON files |
+| Historical lexical memory and audit | Passed after real recoveries | Full acceptance assertions |
+| Spring AI + PGvector RAG + recovery | Three accepted cited roles, actual historical vector context, stored outcome vector retrieval and verified approved recovery | `evidence/cloud-40564112317/ai-rag.json` and `ai-attempt.json` |
+| Focused Java checks after citation change | 6 passed | Final run logs: grounding, provider protocol and memory guards |
+| Broad academic performance study | Not run | Pilot measurements and limitations in `evaluation.md` |
+
+The first complete deterministic run's overall workflow was **failure** because its later AI step fell back. Its deterministic results remain valid phase evidence. A targeted diagnostic run confirmed actual vector retrieval but rejected all three model findings for invalid citations. The prompt had exposed unavailable evidence IDs while the validator excluded them. The fix supplies only available evidence under whitelisted aliases, maps accepted references back to immutable IDs, and retains strict rejection and unverified-interpretation labels. The final green run repeated a real seed recovery, collector checks, stronger live browser test and enabled AI scenario; it did not redundantly repeat the complete three-fault matrix after this AI-only change.
+
+Runtime fixes also removed an inappropriate repository proxy around directly accessed store collaborators and added edge bridge networks for loopback-published interfaces. Control, demo and sandbox networks remain internal. CI packages the exact Java jars and Next.js standalone output built/tested in the same job through `compose.ci.yaml`; the regular Dockerfiles still build from source. No backend language or required service was substituted.
+
+See `remaining-work.md` for the unexecuted larger study, academic review and permanent-hosting boundary. The sections below preserve the **earlier local verification record**, whose Docker-related NOT RUN entries are superseded by the cloud table above.
+
+## Earlier local record
+
 Verified on **27 October 2026 (Asia/Kolkata)** in the initially empty `D:\NEXUS` workspace. This distinguishes source implementation from runtime proof.
 
 | Check | Result | What it establishes |
@@ -43,7 +72,7 @@ Password hashes needed an explicit BCrypt identifier for Spring Security's deleg
 
 OpenRouter integration tests also caught Spring AI 1.1 dropping the `extraBody` reasoning extension while merging options. A narrow outbound interceptor now applies `reasoning.enabled=false` to NVIDIA `:free` chat requests after serialization. Tests verify this on the wire and verify other model requests are not changed. Nemotron's default 2048-dimensional output does not require a schema change: the live provider accepted the explicit 1536-dimension option. Local AI configuration was enabled after these checks passed.
 
-## Remaining acceptance work
+## Earlier local remaining-work list (superseded by cloud status)
 
 1. Start Docker Desktop with Linux containers. Run `docker compose config --quiet`, `docker compose up --build -d`, and inspect service readiness/logs. The standalone Compose validator downloaded in `.tools` cannot supply a Docker engine.
 2. Run Maven verification with Docker available so the PGvector integration test executes rather than skips.
@@ -55,3 +84,4 @@ OpenRouter integration tests also caught Spring AI 1.1 dropping the `extraBody` 
 ## Local toolchain
 
 The preinstalled Java was 8. A workspace-local Temurin Java 21 JDK and Maven 3.9.11 were downloaded into ignored `.tools`, without replacing the system Java. Docker Compose v2.40.3 was downloaded for configuration-only checks. Node 24.16.0 was already available. Chromium was installed for Playwright. These tools are build aids, not part of the Java backend.
+

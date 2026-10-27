@@ -4,6 +4,10 @@ An academic reliability platform for **root-cause diagnosis and developer-approv
 
 **Frontend:** Next.js, React, TypeScript, Tailwind, React Flow. **Backend and demo services:** Java 21, Spring Boot 3.5.7. **AI:** Spring AI 1.1.0 with bounded Java role orchestration. **Storage:** PostgreSQL 17 + PGvector. **Observability:** Micrometer/Prometheus, OpenTelemetry Java agent/Collector, Jaeger, Loki. No Python backend or Python tooling is needed.
 
+## Verified cloud demonstration
+
+The [final cloud workflow passed](https://github.com/rajeevreddy23/NEXUS/actions/runs/40564112317): actual Compose deployment, authenticated populated dependency graph, real telemetry, approved recovery, and one Spring AI/PGvector scenario. A preceding full acceptance run covered ERROR, LATENCY, real DB_POOL exhaustion and negative approval cases. See [measured verification](docs/verification.md), [evaluation](docs/evaluation.md), [evidence](docs/evidence/README.md) and [remaining work](docs/remaining-work.md). Tests used ephemeral runners; no continuously hosted URL or paid infrastructure was created.
+
 ## Quick start on Windows
 
 Prerequisites: Docker Desktop with Linux containers and Docker Compose v2. Allow about 8 GB RAM for Docker and several GB disk space. Node 24 and Java 21/Maven 3.9 are needed only for local development or tests outside containers.

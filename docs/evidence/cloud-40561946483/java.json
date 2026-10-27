@@ -1,0 +1,93 @@
+{
+  "at": "2026-10-27T18:40:09.321Z",
+  "suites": [
+    {
+      "name": "edu.nexus.AiGroundingTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.259
+    },
+    {
+      "name": "edu.nexus.DetectorTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.019
+    },
+    {
+      "name": "edu.nexus.DiagnosisWorkflowTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.605
+    },
+    {
+      "name": "edu.nexus.IncidentMemoryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.174
+    },
+    {
+      "name": "edu.nexus.OpenRouterConfigurationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.417
+    },
+    {
+      "name": "edu.nexus.OpenRouterLiveTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "seconds": 0
+    },
+    {
+      "name": "edu.nexus.PostgresIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 12.867
+    },
+    {
+      "name": "edu.nexus.RecoveryServiceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.662
+    },
+    {
+      "name": "edu.nexus.SecurityTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.827
+    },
+    {
+      "name": "edu.nexus.TelemetryHttpTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.578
+    },
+    {
+      "name": "edu.nexus.demo.DemoControllerTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.163
+    }
+  ]
+}

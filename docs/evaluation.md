@@ -45,7 +45,29 @@ The injected mode is an oracle for this demo. Report that the deterministic diag
 
 Report counts, medians and p95 latencies with uncertainty. Failure and timeout trials belong in denominators; do not exclude them silently. Never infer reduced MTTR without an explicitly described comparison condition.
 
-## Results worksheet (unmeasured)
+## Measured cloud pilot: 27 October 2026
+
+[Run 40561946483](https://github.com/rajeevreddy23/NEXUS/actions/runs/40561946483), code `479abf2bc05950964602c19b2f10d56a352e8648`, executed on a standard Ubuntu 24.04.5 runner (2 CPUs, about 7.75 GiB RAM, Docker 28.0.4). The full deterministic acceptance and authenticated browser-shell test passed; the later AI step failed, so the **overall workflow conclusion is failure**, not a green deployment badge.
+
+Actual machine-readable records are in `evidence/cloud-40561946483/acceptance.json` and `java.json`. Each row below is **one inventory trial**, with explicit scripted developer approval for RESET_FAULT. Detection includes requested scans and can overlap scheduled collection. These are controlled oracle-assisted smoke measurements, not automatic-only detection benchmarks or estimates of production accuracy.
+
+| Scenario | Trials | Injection to incident | Whole trial | Recovery plus post-checks | Correct root / verified reset |
+|---|---:|---:|---:|---:|---|
+| ERROR | 1 | 1,524 ms | 5,357 ms | 1,565 ms | Yes / Yes |
+| LATENCY | 1 | 10,334 ms | 21,327 ms | 1,241 ms | Yes / Yes |
+| DB_POOL | 1 | 5,000 ms | 8,163 ms | 1,077 ms | Yes / Yes |
+
+The artifact's `recoveryMs` includes the approval API call and subsequent service/memory/audit checks before the row is written; it is not a pure action-runtime measurement. Whole trial excludes healthy settling/cleanup after that row. No human decision-time comparison was made. No median/p95 estimate, MTTR improvement, generalized diagnosis accuracy or AI benefit follows from these three observations.
+
+The same run passed anonymous/observer/CSRF restrictions, unvalidated/unconfirmed/stale-revision/replayed approvals, expired sandbox validation, changed live fault state, real three-connection pool exhaustion, memory/audit checks, four Prometheus scrape targets, nonempty request/JVM series, Loki log streams and Jaeger spans. The changed-state check retained LATENCY rather than silently resetting it. Expiry used a deliberately aged validation timestamp in the disposable database.
+
+## Enabled AI/RAG smoke result
+
+The corrected [run 40564112317](https://github.com/rajeevreddy23/NEXUS/actions/runs/40564112317) passed overall. Its targeted scope repeated one seed ERROR recovery and real collectors, verified a populated browser graph, and then ran one orders ERROR incident with AI enabled. Three model roles returned accepted citations, historical context used PGvector, the approved sandbox-tested recovery resolved, and the resulting memory was retrieved using vector search. Actual outputs are in `evidence/cloud-40564112317/ai-rag.json` and `ai-attempt.json`. The six affected Java tests, production frontend build and five fixtures also passed.
+
+This is identity/transport/integration validation, not an expert score for the model's reasoning. The explanations were similar across roles and discussed earlier downstream faults as possible context for the present orders fault. That temporal/causal ambiguity remains a limitation despite valid citations. No model-quality or AI-versus-deterministic benefit is inferred from this single sample. Free provider calls were deliberately bounded; unavailable and rejected attempts were retained as failures.
+
+## Larger study worksheet (not yet measured)
 
 | Scenario | Trials | Detection median | Root accuracy | Validation pass | Recovery success |
 |---|---:|---:|---:|---:|---:|
@@ -56,3 +78,4 @@ Report counts, medians and p95 latencies with uncertainty. Failure and timeout t
 ## Threats to validity
 
 Known injected modes, fixed topology, one machine, limited faults and deterministic recovery all restrict external validity. Agent and model versions can change. Historical records can leak evaluation cases into the prompt. Human approval delay can dominate end-to-end time. Collector failures and stale snapshots can affect evidence coverage. The simplified sandbox excludes downstream dependencies. Heuristic confidence is not a calibrated probability. UI fixture tests do not supply empirical system-performance results.
+

@@ -50,7 +50,7 @@ Evaluate each supported fault on each service, with repeat trials and healthy ba
 
 ## Results status
 
-Automated verification and environment constraints are recorded in `verification.md`. Compilation, unit tests and fixture-based browser tests demonstrate selected implementation properties. They cannot establish deployment health, LLM quality, live vector retrieval, diagnosis accuracy or reduced mean time to recovery. The evaluation table must remain unfilled until trials have actually run. No quantitative performance claim is made here.
+Automated verification and environment constraints are recorded in `verification.md`. Compilation, unit tests and fixture-based browser tests demonstrate selected implementation properties. They cannot establish deployment health, LLM quality, live vector retrieval, diagnosis accuracy or reduced mean time to recovery. A three-trial cloud pilot has now exercised ERROR, LATENCY and actual DB_POOL exhaustion on inventory, each with sandbox validation and approved verified reset. Measured injection-to-incident times were 1,524 ms, 10,334 ms and 5,000 ms respectively. These scan-assisted, oracle-assisted smoke measurements are documented with machine-readable evidence in `evaluation.md`; they do not establish generalized accuracy or reduced MTTR. The larger repeated experimental matrix remains unmeasured. The first enabled AI/RAG workflow fell back and failed its strict AI assertion. A diagnosed prompt/citation-contract mismatch was fixed, and the final targeted run passed three cited model roles, real historical PGvector context, approved recovery and subsequent vector retrieval. These are integration results, not a demonstration of semantic correctness or AI benefit. The model explanations were similar across roles and retained temporal/causal ambiguity about earlier downstream faults.
 
 ## Safety, limitations and ethics
 
@@ -74,3 +74,4 @@ Potential extensions include trace-derived dependency discovery, resource baseli
 10. Sui et al. (2023), “LogKG: Log failure diagnosis through knowledge graph,” IEEE TSC 16(5), 3493–3507. [IEEE record](https://ieeexplore.ieee.org/abstract/document/10179162).
 
 This report is an implementation draft for team review. Confirm institution formatting, author spelling, references and measured results before academic submission.
+
