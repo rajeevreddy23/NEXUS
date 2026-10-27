@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 25
     env:
       NEXUS_AI_ONLY: ${{ contains(github.event.head_commit.message, '[ai-only]') }}
+      NEXUS_LIVE_BROWSER: ${{ contains(github.event.head_commit.message, '[live-browser]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -34,7 +35,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          if [ "$NEXUS_AI_ONLY" != 'true' ]; then
+          if [ "$NEXUS_AI_ONLY" != 'true' ] || [ "$NEXUS_LIVE_BROWSER" = 'true' ]; then
             npx playwright install --with-deps chromium
             npm test
           fi
@@ -46,7 +47,7 @@ jobs:
           docker compose up --build -d
           node scripts/cloud-acceptance.mjs
       - name: Real browser against Compose
-        if: env.NEXUS_AI_ONLY != 'true'
+        if: env.NEXUS_AI_ONLY != 'true' || env.NEXUS_LIVE_BROWSER == 'true'
         run: npx playwright test --config playwright.live.config.ts
         working-directory: frontend
       - name: One explicitly requested free AI RAG scenario

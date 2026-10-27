@@ -18,8 +18,9 @@ class AiGroundingTest {
   @SuppressWarnings("unchecked") var provider=(ObjectProvider<ChatClient>)mock(ObjectProvider.class);when(provider.getIfAvailable()).thenReturn(chat);
   var memory=mock(IncidentMemory.class);when(memory.search(anyString())).thenReturn(List.of());
   var workflow=new DiagnosisWorkflow(store,new ServiceRegistry("http://localhost","http://sandbox"),new Telemetry(json,"test","http://unused","http://unused","http://unused"),memory,provider);
-  return workflow.diagnose("inventory",List.of(new Evidence("e1","state:inventory",Instant.now(),Map.of("available",true,"payload",Map.of("mode","ERROR")))));
+  return workflow.diagnose("inventory",List.of(new Evidence("immutable-incident-evidence","state:inventory",Instant.now(),Map.of("available",true,"payload",Map.of("mode","ERROR")))));
  }
  @Test void rejectsInventedEvidenceIdsAndRetainsDeterministicPlan(){var diagnosis=run("{\"explanation\":\"invented\",\"evidenceIds\":[\"made-up\"]}");assertThat(diagnosis.mode()).isEqualTo("AI_UNAVAILABLE_DETERMINISTIC_FALLBACK");assertThat(diagnosis.findings()).noneMatch(f->f.conclusion().equals("invented"));assertThat(diagnosis.plan().action()).isEqualTo("RESET_FAULT");}
- @Test void validCitationsRemainLabelledUnverifiedInterpretations(){var diagnosis=run("{\"explanation\":\"A reported fault is visible, with uncertainty.\",\"evidenceIds\":[\"e1\"]}");assertThat(diagnosis.mode()).isEqualTo("SPRING_AI_ASSISTED");assertThat(diagnosis.findings().stream().filter(f->f.agent().startsWith("Spring AI"))).hasSize(3).allMatch(f->f.agent().contains("unverified interpretation"));}
+ @Test void validCitationsRemainLabelledUnverifiedInterpretations(){var diagnosis=run("{\"explanation\":\"A reported fault is visible, with uncertainty.\",\"evidenceIds\":[\"E1\"]}");assertThat(diagnosis.mode()).isEqualTo("SPRING_AI_ASSISTED");assertThat(diagnosis.findings().stream().filter(f->f.agent().startsWith("Spring AI"))).hasSize(3).allMatch(f->f.agent().contains("unverified interpretation")&&f.evidenceIds().equals(List.of("immutable-incident-evidence")));}
 }
+
