@@ -14,7 +14,7 @@ const indexed=await req('/memory/reindex',{});assert.equal(indexed.indexed,1);
 await req('/scan',{});assert((await req('/services')).every(s=>s.snapshot?.healthy&&s.snapshot.anomalies.length===0));
 await req('/demo/fault',{service:'orders',mode:'ERROR'});
 await req('/scan',{});await req('/scan',{});
-let i=(await req('/incidents')).find(i=>i.service==='orders'&&!['RESOLVED','CLOSED'].includes(i.status));assert(i);assert.equal(i.diagnosis.mode,'SPRING_AI_ASSISTED');assert.equal(i.diagnosis.rootService,'orders');assert(i.diagnosis.similarIncidents.some(h=>h.retrieval==='vector'));
+let i=(await req('/incidents')).find(i=>i.service==='orders'&&!['RESOLVED','CLOSED'].includes(i.status));assert(i);mkdirSync('evidence',{recursive:true});writeFileSync('evidence/ai-attempt.json',JSON.stringify({at:new Date().toISOString(),mode:i.diagnosis.mode,similarRetrieval:i.diagnosis.similarIncidents.map(h=>h.retrieval),roles:i.diagnosis.findings.filter(f=>f.agent.startsWith('Spring AI '))},null,2));assert.equal(i.diagnosis.mode,'SPRING_AI_ASSISTED');assert.equal(i.diagnosis.rootService,'orders');assert(i.diagnosis.similarIncidents.some(h=>h.retrieval==='vector'));
 const findings=i.diagnosis.findings.filter(f=>f.agent.startsWith('Spring AI '));assert.equal(findings.length,3);
 const ids=new Set(i.evidence.filter(e=>e.data.available!==false).map(e=>e.id));assert(findings.every(f=>f.evidenceIds.length>0&&f.evidenceIds.every(id=>ids.has(id))));
 i=await req(`/incidents/${i.id}/validate`,{});assert.equal(i.validation.passed,true);i=await req(`/incidents/${i.id}/approve`,{version:i.version,confirmed:true});assert.equal(i.status,'RESOLVED');

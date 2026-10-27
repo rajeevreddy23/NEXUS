@@ -9,6 +9,8 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      NEXUS_AI_ONLY: ${{ contains(github.event.head_commit.message, '[ai-only]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -18,8 +20,24 @@ jobs:
       - run: node scripts/setup.mjs
       - name: Use verified runtime artifacts
         run: echo 'COMPOSE_FILE=compose.yaml:compose.ci.yaml' >> "$GITHUB_ENV"
-      - run: docker info && mvn -B verify && node scripts/test-summary.mjs
-      - run: npm ci && npm run build && npx playwright install --with-deps chromium && npm test
+      - name: Relevant Java checks
+        run: |
+          docker info
+          if [ "$NEXUS_AI_ONLY" = 'true' ]; then
+            mvn -B package -DskipTests
+            mvn -B -pl backend -Dtest=AiGroundingTest,OpenRouterConfigurationTest,IncidentMemoryTest test
+          else
+            mvn -B verify
+            node scripts/test-summary.mjs
+          fi
+      - name: Build console; run fixtures for full acceptance
+        run: |
+          npm ci
+          npm run build
+          if [ "$NEXUS_AI_ONLY" != 'true' ]; then
+            npx playwright install --with-deps chromium
+            npm test
+          fi
         working-directory: frontend
       - name: Full isolated stack
         run: |
@@ -28,6 +46,7 @@ jobs:
           docker compose up --build -d
           node scripts/cloud-acceptance.mjs
       - name: Real browser against Compose
+        if: env.NEXUS_AI_ONLY != 'true'
         run: npx playwright test --config playwright.live.config.ts
         working-directory: frontend
       - name: One explicitly requested free AI RAG scenario

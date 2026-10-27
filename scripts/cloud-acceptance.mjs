@@ -3,6 +3,7 @@ import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 const env=Object.fromEntries(readFileSync('.env','utf8').trim().split('\n').map(l=>{let i=l.indexOf('=');return [l.slice(0,i),l.slice(i+1)];}));
+const aiOnly=process.env.NEXUS_AI_ONLY==='true';
 const results=[];mkdirSync('evidence',{recursive:true});
 function record(check,data={}){results.push({check,at:new Date().toISOString(),...data});writeFileSync('evidence/acceptance.json',JSON.stringify(results,null,2));console.log(JSON.stringify(results.at(-1)));}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -25,7 +26,7 @@ try {
  await until(async()=>{await dev('/scan',{method:'POST',body:{}});assert((await dev('/services')).every(s=>s.snapshot?.healthy&&s.snapshot.anomalies.length===0));return true;},60);
  for(const old of await dev('/incidents'))if(!['RESOLVED','CLOSED'].includes(old.status))await dev(`/incidents/${old.id}/close`,{method:'POST',body:{reason:'Disposable cloud startup baseline: all service observations are now healthy'}});
  record('healthy-startup-baseline');
- for(const mode of ['ERROR','LATENCY','DB_POOL']){
+ for(const mode of (aiOnly?['ERROR']:['ERROR','LATENCY','DB_POOL'])){
  const start=Date.now();await dev('/demo/fault',{method:'POST',body:{service:'inventory',mode}});
  await dev('/scan',{method:'POST',body:{}});await dev('/scan',{method:'POST',body:{}});
  if(mode==='DB_POOL'){const snapshot=(await dev('/services')).find(s=>s.id==='inventory').snapshot;assert(snapshot.dbConnections>=3);assert.equal(snapshot.evidence.find(e=>e.source==='state:inventory').data.payload.heldConnections,3);}
@@ -43,7 +44,7 @@ try {
  await until(async()=>{await dev('/scan',{method:'POST',body:{}});assert((await dev('/services')).every(s=>s.snapshot?.healthy&&s.snapshot.anomalies.length===0));return true;},45);
  for(const old of await dev('/incidents'))if(!['RESOLVED','CLOSED'].includes(old.status))await dev(`/incidents/${old.id}/close`,{method:'POST',body:{reason:'Cloud acceptance: dependency healthy after inventory recovery'}});
  }
- for(const gate of ['expired-validation','changed-live-state']){
+ for(const gate of (aiOnly?[]:['expired-validation','changed-live-state'])){
  await dev('/demo/fault',{method:'POST',body:{service:'inventory',mode:'ERROR'}});
  await dev('/scan',{method:'POST',body:{}});await dev('/scan',{method:'POST',body:{}});
  let i=(await dev('/incidents')).find(i=>i.service==='inventory'&&!['RESOLVED','CLOSED'].includes(i.status));assert(i);

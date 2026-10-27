@@ -32,11 +32,21 @@ class DiagnosisWorkflow {
    // Separate bounded LLM roles share cited outputs. The deterministic action plan remains outside model control.
    for(String role:List.of("Log Analyst","Dependency Analyst","Root Cause Reviewer"))try{
     var finding=review(role,cause,evidence,findings,history);findings.add(finding);explanation=finding.conclusion();completed++;
-   }catch(Exception e){findings.add(new Finding("Spring AI "+role,"Model output unavailable or rejected: "+e.getClass().getSimpleName(),List.of()));}
+   }catch(Exception e){findings.add(new Finding("Spring AI "+role,"Model output unavailable or rejected: "+safeFailure(e),List.of()));}
    mode=completed==3?"SPRING_AI_ASSISTED":completed>0?"PARTIAL_AI_ASSISTANCE":"AI_UNAVAILABLE_DETERMINISTIC_FALLBACK";
   }
   findings.add(new Finding("Documentation Agent","Investigation, sources, plan, approval, attempted actions and verification are retained in the incident audit. Outcome enters memory when the incident is closed or recovery finishes.",List.of()));
   return new Diagnosis(mode,cause,root,known?0.8:0.25,List.copyOf(findings),history,plan,explanation);
+ }
+ // Only classifications and our own validation messages are exposed; never provider bodies or headers.
+ private String safeFailure(Exception error){
+  String reason=error.getClass().getSimpleName();
+  for(Throwable cause=error;cause!=null;cause=cause.getCause()){
+   if(cause instanceof org.springframework.web.client.RestClientResponseException response)return reason+" HTTP "+response.getStatusCode().value();
+   if(cause.getCause()==null)reason+=" / "+cause.getClass().getSimpleName();
+  }
+  if(error.getMessage()!=null&&Set.of("Model did not cite evidence","Model cited unavailable or unknown evidence","Invalid explanation").contains(error.getMessage()))reason+=" / "+error.getMessage();
+  return reason;
  }
  private String summarizeLogs(List<Evidence> logs){
   long available=logs.stream().filter(e->Boolean.TRUE.equals(e.data().get("available"))).count();
@@ -61,3 +71,4 @@ class DiagnosisWorkflow {
   }return service;}
  void investigate(UUID id){var incident=store.get(id);store.audit(id,"orchestrator","INVESTIGATION_STARTED",Map.of("roles",7));var diagnosis=diagnose(incident.service(),incident.evidence());store.diagnosis(id,diagnosis);store.audit(id,"orchestrator","DIAGNOSIS_COMPLETED",diagnosis);}
 }
+
