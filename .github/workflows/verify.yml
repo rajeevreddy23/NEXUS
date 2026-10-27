@@ -1,19 +1,36 @@
 name: Verify NEXUS
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+concurrency:
+  group: nexus-verify-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  java:
+  verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: '21', cache: maven}
-      - run: docker info
-      - run: mvn -B verify
-  console:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: '24', cache: npm, cache-dependency-path: frontend/package-lock.json}
+      - run: docker info && mvn -B verify
       - run: npm ci && npm run build && npx playwright install --with-deps chromium && npm test
         working-directory: frontend
+      - name: Full isolated stack
+        run: |
+          node scripts/setup.mjs
+          docker compose config --quiet
+          docker compose up --build -d
+          node scripts/cloud-acceptance.mjs
+      - name: Remove ephemeral containers and data
+        if: always()
+        run: docker compose down -v --remove-orphans
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nexus-verification
+          path: evidence/
+          retention-days: 3
+          if-no-files-found: ignore
