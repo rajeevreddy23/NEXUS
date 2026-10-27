@@ -22,7 +22,9 @@ try {
  for(const [req,user,password] of [[dev,'developer',env.NEXUS_PASSWORD],[observer,'observer',env.OBSERVER_PASSWORD]]){
  await req('/csrf');await req('/login',{method:'POST',form:true,body:{username:user,password},status:204});await req('/csrf');await req('/me');}
  await observer('/scan',{method:'POST',body:{},status:'reject'});await dev('/scan',{method:'POST',body:{},noCsrf:true,status:'reject'});record('authentication-role-csrf');
- await until(async()=>{await dev('/scan',{method:'POST',body:{}});assert((await dev('/services')).every(s=>s.snapshot?.healthy));return true;},60);
+ await until(async()=>{await dev('/scan',{method:'POST',body:{}});assert((await dev('/services')).every(s=>s.snapshot?.healthy&&s.snapshot.anomalies.length===0));return true;},60);
+ for(const old of await dev('/incidents'))if(!['RESOLVED','CLOSED'].includes(old.status))await dev(`/incidents/${old.id}/close`,{method:'POST',body:{reason:'Disposable cloud startup baseline: all service observations are now healthy'}});
+ record('healthy-startup-baseline');
  for(const mode of ['ERROR','LATENCY','DB_POOL']){
  const start=Date.now();await dev('/demo/fault',{method:'POST',body:{service:'inventory',mode}});
  await dev('/scan',{method:'POST',body:{}});await dev('/scan',{method:'POST',body:{}});
