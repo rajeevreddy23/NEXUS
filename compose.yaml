@@ -1,0 +1,164 @@
+name: nexus
+x-otel: &otel
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+  OTEL_METRICS_EXPORTER: none
+  OTEL_LOGS_EXPORTER: otlp
+  OTEL_TRACES_EXPORTER: otlp
+  OTEL_TRACES_SAMPLER: always_on
+x-demo: &demo
+  build: {context: ., dockerfile: Dockerfile.java, target: demo}
+  restart: unless-stopped
+  mem_limit: 512m
+  networks: [demo-net, telemetry]
+  depends_on:
+    demo-db: {condition: service_healthy}
+  read_only: true
+  tmpfs: [/tmp]
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment: {POSTGRES_DB: nexus, POSTGRES_USER: nexus, POSTGRES_PASSWORD: '${DB_PASSWORD:?Run setup.ps1}'}
+    volumes: [nexus-db:/var/lib/postgresql/data]
+    networks: [control]
+    healthcheck: {test: ['CMD-SHELL', 'pg_isready -U nexus -d nexus'], interval: 5s, timeout: 3s, retries: 20}
+    restart: unless-stopped
+  demo-db:
+    image: postgres:17-alpine
+    environment: {POSTGRES_DB: demo, POSTGRES_USER: demo, POSTGRES_PASSWORD: '${DEMO_DB_PASSWORD:?Run setup.ps1}'}
+    volumes: [demo-db:/var/lib/postgresql/data]
+    networks: [demo-net]
+    healthcheck: {test: ['CMD-SHELL', 'pg_isready -U demo -d demo'], interval: 5s, timeout: 3s, retries: 20}
+    restart: unless-stopped
+  sandbox-db:
+    image: postgres:17-alpine
+    environment: {POSTGRES_DB: sandbox, POSTGRES_USER: sandbox, POSTGRES_PASSWORD: '${SANDBOX_DB_PASSWORD:?Run setup.ps1}'}
+    networks: [sandbox-net]
+    healthcheck: {test: ['CMD-SHELL', 'pg_isready -U sandbox -d sandbox'], interval: 5s, timeout: 3s, retries: 20}
+    restart: unless-stopped
+  backend:
+    build: {context: ., dockerfile: Dockerfile.java, target: backend}
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: nexus-control
+      DATABASE_URL: jdbc:postgresql://postgres:5432/nexus
+      DB_PASSWORD: ${DB_PASSWORD}
+      NEXUS_USER: ${NEXUS_USER:-developer}
+      NEXUS_PASSWORD: ${NEXUS_PASSWORD:?Run setup.ps1}
+      OBSERVER_PASSWORD: ${OBSERVER_PASSWORD:?Run setup.ps1}
+      DEMO_TOKEN: ${DEMO_TOKEN:?Run setup.ps1}
+      SERVICE_ORIGIN: http://demo
+      SANDBOX_URL: http://recovery-sandbox:8094
+      PROMETHEUS_URL: http://prometheus:9090
+      LOKI_URL: http://loki:3100
+      JAEGER_URL: http://jaeger:16686
+      AI_ENABLED: ${AI_ENABLED:-false}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CHAT_MODEL: ${CHAT_MODEL:-nvidia/nemotron-3-ultra-550b-a55b:free}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-nvidia/nemotron-3.5-embed-1b:free}
+      AI_BASE_URL: ${AI_BASE_URL:-https://openrouter.ai/api}
+    depends_on:
+      postgres: {condition: service_healthy}
+      inventory: {condition: service_started}
+      payments: {condition: service_started}
+      orders: {condition: service_started}
+    networks: [control, demo-net, sandbox-net, telemetry, egress]
+    restart: unless-stopped
+    mem_limit: 768m
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+  frontend:
+    build: ./frontend
+    environment: {BACKEND_URL: 'http://backend:8080'}
+    ports: ['127.0.0.1:3000:3000']
+    depends_on: [backend]
+    networks: [control]
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+  inventory:
+    <<: *demo
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: inventory
+      SERVICE_NAME: inventory
+      PORT: 8093
+      DATABASE_URL: jdbc:postgresql://demo-db:5432/demo
+      DB_PASSWORD: ${DEMO_DB_PASSWORD}
+      DEMO_TOKEN: ${DEMO_TOKEN}
+  payments:
+    <<: *demo
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: payments
+      SERVICE_NAME: payments
+      PORT: 8092
+      UPSTREAM_URL: http://inventory:8093
+      DATABASE_URL: jdbc:postgresql://demo-db:5432/demo
+      DB_PASSWORD: ${DEMO_DB_PASSWORD}
+      DEMO_TOKEN: ${DEMO_TOKEN}
+  orders:
+    <<: *demo
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: orders
+      SERVICE_NAME: orders
+      PORT: 8091
+      UPSTREAM_URL: http://payments:8092
+      DATABASE_URL: jdbc:postgresql://demo-db:5432/demo
+      DB_PASSWORD: ${DEMO_DB_PASSWORD}
+      DEMO_TOKEN: ${DEMO_TOKEN}
+  recovery-sandbox:
+    <<: *demo
+    networks: [sandbox-net]
+    depends_on:
+      sandbox-db: {condition: service_healthy}
+    environment:
+      SERVICE_NAME: recovery-sandbox
+      PORT: 8094
+      DATABASE_URL: jdbc:postgresql://sandbox-db:5432/sandbox
+      DB_USER: sandbox
+      DB_PASSWORD: ${SANDBOX_DB_PASSWORD}
+      DEMO_TOKEN: ${DEMO_TOKEN}
+      OTEL_SDK_DISABLED: 'true'
+  prometheus:
+    image: prom/prometheus:v3.7.2
+    volumes: ['./infra/prometheus.yml:/etc/prometheus/prometheus.yml:ro',prometheus-data:/prometheus]
+    ports: ['127.0.0.1:9090:9090']
+    networks: [telemetry]
+    restart: unless-stopped
+  jaeger:
+    image: jaegertracing/all-in-one:1.76.0
+    environment: {COLLECTOR_OTLP_ENABLED: 'true'}
+    ports: ['127.0.0.1:16686:16686']
+    networks: [telemetry]
+    restart: unless-stopped
+  loki:
+    image: grafana/loki:3.5.7
+    command: [-config.file=/etc/loki/config.yaml]
+    volumes: ['./infra/loki.yml:/etc/loki/config.yaml:ro',loki-data:/loki]
+    ports: ['127.0.0.1:3100:3100']
+    networks: [telemetry]
+    restart: unless-stopped
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.137.0
+    command: [--config=/etc/otelcol/config.yaml]
+    volumes: ['./infra/otel-collector.yml:/etc/otelcol/config.yaml:ro']
+    networks: [telemetry]
+    depends_on: [loki,jaeger]
+    restart: unless-stopped
+networks:
+  control: {internal: true}
+  demo-net: {internal: true}
+  sandbox-net: {internal: true}
+  telemetry: {internal: true}
+  egress: {}
+volumes:
+  nexus-db: {}
+  demo-db: {}
+  prometheus-data: {}
+  loki-data: {}

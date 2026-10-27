@@ -1,0 +1,9 @@
+200 pgvector/pgvector:pg17
+200 library/postgres:17-alpine
+200 prom/prometheus:v3.7.2
+200 jaegertracing/all-in-one:1.76.0
+200 grafana/loki:3.5.7
+200 otel/opentelemetry-collector-contrib:0.137.0
+200 library/maven:3.9.11-eclipse-temurin-21
+200 library/eclipse-temurin:21-jre-alpine
+200 library/node:24-alpine

@@ -1,0 +1,30 @@
+server:
+  port: ${PORT:8091}
+spring:
+  application:
+    name: ${SERVICE_NAME:orders}
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/demo}
+    username: ${DB_USER:demo}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 3
+      connection-timeout: 700
+  threads:
+    virtual:
+      enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
+demo:
+  token: ${DEMO_TOKEN}
+  upstream: ${UPSTREAM_URL:}
+logging:
+  structured:
+    format:
+      console: logstash

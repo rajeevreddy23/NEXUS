@@ -1,0 +1,17 @@
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.355 s -- in edu.nexus.AiGroundingTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.151 s -- in edu.nexus.DetectorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in edu.nexus.DiagnosisWorkflowTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in edu.nexus.IncidentMemoryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.724 s -- in edu.nexus.OpenRouterConfigurationTest
+[WARNING] Tests run: 1, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0 s -- in edu.nexus.OpenRouterLiveTest
+[WARNING] Tests run: 1, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.001 s -- in edu.nexus.PostgresIntegrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.649 s -- in edu.nexus.RecoveryServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.871 s -- in edu.nexus.SecurityTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.070 s -- in edu.nexus.TelemetryHttpTest
+[WARNING] Tests run: 28, Failures: 0, Errors: 0, Skipped: 2
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.751 s -- in edu.nexus.demo.DemoControllerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Reactor Summary for nexus 1.0.0:
+[INFO] backend ............................................ SUCCESS [ 16.727 s]
+[INFO] demo ............................................... SUCCESS [  3.229 s]
+[INFO] BUILD SUCCESS
