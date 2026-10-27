@@ -49,7 +49,7 @@ try {
  if(gate==='expired-validation'){
   assert.match(i.id,/^[0-9a-f-]{36}$/);
   // Controlled test fixture: age only the sandbox-validation timestamp in the disposable database.
-  execFileSync('docker',['compose','exec','-T','postgres','psql','-U','nexus','-d','nexus','-v','ON_ERROR_STOP=1','-c',`update incident set validation=jsonb_set(validation,'{at}',to_jsonb((now()-interval '6 minutes')::text)) where id='${i.id}'`],{stdio:'pipe'});
+  execFileSync('docker',['compose','exec','-T','postgres','psql','-U','nexus','-d','nexus','-v','ON_ERROR_STOP=1','-c',`update incident set validation=jsonb_set(validation,'{at}',to_jsonb(to_char((now() at time zone 'UTC')-interval '6 minutes','YYYY-MM-DD"T"HH24:MI:SS"Z"'))) where id='${i.id}'`],{stdio:'pipe'});
   await dev(`/incidents/${i.id}/approve`,{method:'POST',body:{version:i.version,confirmed:true},status:'reject'});
   assert.equal((await dev(`/incidents/${i.id}`)).status,'AWAITING_APPROVAL');
  }else{
