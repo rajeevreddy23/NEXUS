@@ -2,6 +2,7 @@
 import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import assert from 'node:assert/strict';
+if(process.env.NEXUS_DISPOSABLE_TESTS!=='true')throw Error('Run only against disposable test databases: set NEXUS_DISPOSABLE_TESTS=true explicitly');
 const env=Object.fromEntries(readFileSync('.env','utf8').split(/\r?\n/).filter(l=>l.includes('=')).map(l=>{let i=l.indexOf('=');return [l.slice(0,i),l.slice(i+1)];}));
 const results=[];mkdirSync('evidence',{recursive:true});
 function record(check){results.push({check,passed:true,at:new Date().toISOString()});writeFileSync('evidence/application-acceptance.json',JSON.stringify(results,null,2));console.log('Passed: '+check);}
@@ -38,4 +39,14 @@ try{
  await dev('/scan',{});await dev('/scan',{});i=(await dev('/incidents')).find(x=>x.service==='tasks'&&!['RESOLVED','CLOSED'].includes(x.status));assert(i);i=await dev(`/incidents/${i.id}/validate`,{});assert.equal(i.validation.passed,true);const version=i.version;i=await dev(`/incidents/${i.id}/approve`,{version,confirmed:true});assert.equal(i.status,'RESOLVED');assert.equal(i.outcome.healthChecksPassed,true);await dev(`/incidents/${i.id}/approve`,{version,confirmed:true},'reject');assert.equal((await admin('/admin/operations')).maintenance,false);assert.equal((await alice(`/projects/${p.id}/tasks`)).items[0].status,'DONE');assert((await dev('/memory?q=tasks')).length>0);record('isolated validation, explicit approval, three live probes and historical memory');
  await until(async()=>{await dev('/scan',{});const s=(await dev('/services'))[0].snapshot;const payload=source=>s.evidence.find(e=>e.source===source)?.data.payload;assert(payload('prometheus:tasks')?.data?.result?.length>0);assert(payload('loki:tasks')?.data?.result?.length>0);assert(payload('jaeger:tasks')?.data?.length>0);});record('nonempty real Prometheus, Loki and Jaeger telemetry');
  await alice(`/projects/${p.id}/update`,{name:p.name,description:p.description,archived:true,version:p.version});await bob(`/projects/${p.id}/tasks`,task,409);record('archived projects reject writes');
+ // A genuine infrastructure outage is outside the maintenance runbook and must never offer automated repair.
+ for(const old of await dev('/incidents'))if(!['RESOLVED','CLOSED'].includes(old.status))await dev(`/incidents/${old.id}/close`,{reason:'End of maintenance acceptance; testing database outage next'});
+ compose('stop','tasks-db');await alice('/projects',undefined,503);await dev('/scan',{});await dev('/scan',{});
+ i=(await dev('/incidents')).find(x=>x.service==='tasks'&&!['RESOLVED','CLOSED'].includes(x.status));assert(i);assert.equal(i.diagnosis.plan.action,'MANUAL_INVESTIGATION');await dev(`/incidents/${i.id}/validate`,{},'reject');await dev(`/incidents/${i.id}/approve`,{version:i.version,confirmed:true},'reject');record('real database outage has no unsupported executable recovery');
+ compose('start','tasks-db');await until(()=>alice(`/projects/${p.id}/tasks`));assert.equal((await alice(`/projects/${p.id}/tasks`)).items[0].status,'DONE');await dev(`/incidents/${i.id}/close`,{reason:'Disposable database outage restored by test operator'});await until(async()=>{await dev('/scan',{});assert((await dev('/services')).every(s=>s.snapshot?.healthy));});record('database reconnect preserves business records');
+ const dump=compose('exec','-T','tasks-db','pg_dump','-U','tasks','-Fc','tasks');
+ compose('exec','-T','tasks-db','createdb','-U','tasks','nexus_restore_check');
+ try{execFileSync('docker',['compose','exec','-T','tasks-db','pg_restore','-U','tasks','-d','nexus_restore_check','--exit-on-error'],{input:dump,stdio:['pipe','pipe','pipe'],timeout:90000});
+ const restored=compose('exec','-T','tasks-db','psql','-U','tasks','-d','nexus_restore_check','-Atc',`select status from task where id='${t.id}'`).toString().trim();assert.equal(restored,'DONE');record('backup restored into independent database and business record verified');
+ }finally{compose('exec','-T','tasks-db','dropdb','-U','tasks','nexus_restore_check');}
 }catch(e){console.error(e.message);process.exitCode=1;}

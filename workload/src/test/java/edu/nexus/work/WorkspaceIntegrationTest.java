@@ -54,4 +54,13 @@ class WorkspaceIntegrationTest {
   mvc.perform(post("/ops/maintenance").header("X-Nexus-Token",token).contentType("application/json").content("{\"enabled\":false,\"expectedVersion\":0}")).andExpect(status().isConflict());
   mvc.perform(post("/ops/maintenance").header("X-Nexus-Token",token).contentType("application/json").content("{\"enabled\":false,\"expectedVersion\":1}")).andExpect(status().isOk());mvc.perform(get("/ops/probe").header("X-Nexus-Token",token)).andExpect(status().isOk());mvc.perform(get("/ops/events").header("X-Nexus-Token",token)).andExpect(status().isOk());assertThat(db.queryForObject("select count(*) from project",Integer.class)).isEqualTo(1);
  }
+ @Test void invalidPayloadsAndNonmemberAssigneesAreRejected()throws Exception{
+  UUID id=project();UUID bob=db.queryForObject("select id from app_user where username='bob'",UUID.class);
+  String body="{\"title\":\"Restricted assignment\",\"status\":\"TODO\",\"priority\":\"HIGH\",\"assigneeId\":\""+bob+"\"}";
+  mvc.perform(post("/api/projects/"+id+"/tasks").with(user("alice").roles("MEMBER")).with(csrf()).contentType("application/json").content(body)).andExpect(status().isBadRequest());
+  mvc.perform(get("/api/projects/"+id+"/tasks?limit=1000").with(user("alice").roles("MEMBER"))).andExpect(status().isBadRequest());
+  mvc.perform(get("/api/projects/not-a-uuid/tasks").with(user("alice").roles("MEMBER"))).andExpect(status().isBadRequest());
+  mvc.perform(post("/api/projects").with(user("alice").roles("MEMBER")).with(csrf()).contentType("application/json").content("{")).andExpect(status().isBadRequest());
+  assertThat(db.queryForObject("select count(*) from task",Integer.class)).isZero();
+ }
 }

@@ -17,8 +17,12 @@ class OperationalFilter extends OncePerRequestFilter {
   if(path.startsWith("/ops/")||path.startsWith("/actuator/metrics")){
    String key=req.getHeader("X-Nexus-Token");if(key==null||!MessageDigest.isEqual(token,key.getBytes(StandardCharsets.UTF_8))){res.sendError(401);return;}
   }
-  if((path.startsWith("/api/projects")||path.startsWith("/api/tasks"))&&operations.maintenance()){
-   res.setStatus(503);res.setHeader("Retry-After","60");res.setContentType("application/json");res.getWriter().write("{\"error\":\"Application is temporarily in maintenance. Your data is preserved.\"}");return;
+  if(path.startsWith("/api/projects")||path.startsWith("/api/tasks")){
+   try{if(operations.maintenance()){
+    res.setStatus(503);res.setHeader("Retry-After","60");res.setContentType("application/json");res.getWriter().write("{\"error\":\"Application is temporarily in maintenance. Your data is preserved.\"}");return;
+   }}catch(org.springframework.dao.DataAccessException e){
+    operations.event("Business request failed: database unavailable");res.setStatus(503);res.setHeader("Retry-After","10");res.setContentType("application/json");res.getWriter().write("{\"error\":\"Database temporarily unavailable. Please retry.\"}");return;
+   }
   }
   chain.doFilter(req,res);
  }
