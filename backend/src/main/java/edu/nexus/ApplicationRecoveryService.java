@@ -7,6 +7,13 @@ import org.springframework.stereotype.Service;
 class ApplicationRecoveryService {
  final IncidentStore store;final ServiceRegistry registry;final Telemetry telemetry;final IncidentMemory memory;
  ApplicationRecoveryService(IncidentStore store,ServiceRegistry registry,Telemetry telemetry,IncidentMemory memory){this.store=store;this.registry=registry;this.telemetry=telemetry;this.memory=memory;}
+ @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+ public void reconcileInterrupted(){
+  if(!registry.applicationMode)return;
+  // This deployment supports one controller. Never replay an action whose completion is unknown.
+  for(var row:store.db.queryForList("update incident set status='RECOVERY_FAILED',outcome=?::jsonb,version=version+1,updated_at=now() where status='EXECUTING' returning id",store.json.write(Map.of("success",false,"completionUnknown",true,"reason","Controller restarted during execution; inspect live application state before any further action"))))store.audit((UUID)row.get("id"),"startup","INTERRUPTED_ACTION_REQUIRES_REVIEW",Map.of("automaticReplay",false));
+  for(var row:store.db.queryForList("update incident set status='AWAITING_VALIDATION',validation=null,version=version+1,updated_at=now() where status='VALIDATING' returning id"))store.audit((UUID)row.get("id"),"startup","INTERRUPTED_VALIDATION_RESET",Map.of("freshValidationRequired",true));
+ }
  boolean supports(UUID id){var i=store.get(id);return registry.applicationMode&&i.diagnosis()!=null&&i.diagnosis().plan().action().equals("RESUME_TRAFFIC");}
  private Incident require(UUID id){if(!supports(id))throw new IllegalStateException("No operational runbook is available");return store.get(id);}
  boolean verify(String url){for(int n=0;n<3;n++){long start=System.nanoTime();if(!telemetry.applicationHealthy(url)||(System.nanoTime()-start)>1_200_000_000L)return false;if(n<2)try{Thread.sleep(300);}catch(InterruptedException e){Thread.currentThread().interrupt();return false;}}return true;}

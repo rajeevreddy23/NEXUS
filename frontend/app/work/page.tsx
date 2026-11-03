@@ -1,5 +1,5 @@
 'use client';
-import {useEffect,useState,FormEvent} from 'react';
+import {useEffect,useState,useRef,FormEvent} from 'react';
 import './work.css';
 type Row={id:string;name:string;description:string;version:number;archived:boolean;owner_id:string;task_count:number};
 type Task={id:string;title:string;description:string;status:string;priority:string;assignee_id:string|null;due_date:string|null;version:number};
@@ -16,10 +16,11 @@ export default function Workspace(){
  const [projects,setProjects]=useState<Row[]>([]),[selected,setSelected]=useState(''),[tasks,setTasks]=useState<Task[]>([]),[members,setMembers]=useState<Person[]>([]),[history,setHistory]=useState<unknown[]>([]),[users,setUsers]=useState<Person[]>([]),[operations,setOperations]=useState<{maintenance:boolean;reason:string}|null>(null);
  const [screen,setScreen]=useState('projects'),[editing,setEditing]=useState<Task|null>(null),[offset,setOffset]=useState(0),[total,setTotal]=useState(0),[filter,setFilter]=useState('ALL');
  const project=projects.find(p=>p.id===selected);const canManage=me?.role==='ADMIN'||project?.owner_id===me?.id;
- async function load(id=selected,page=offset){const list=await request<Row[]>('/projects');setProjects(list);if(id&&list.some(p=>p.id===id)){const [t,m,h]=await Promise.all([request<{items:Task[];total:number}>(`/projects/${id}/tasks?limit=50&offset=${page}`),request<Person[]>(`/projects/${id}/members`),request<unknown[]>(`/projects/${id}/audit`)]);setTasks(t.items);setTotal(t.total);setMembers(m);setHistory(h);}}
+ const loadSequence=useRef(0);
+ async function load(id=selected,page=offset){const sequence=++loadSequence.current;const list=await request<Row[]>('/projects');if(sequence!==loadSequence.current)return;setProjects(list);if(id&&list.some(p=>p.id===id)){const [t,m,h]=await Promise.all([request<{items:Task[];total:number}>(`/projects/${id}/tasks?limit=50&offset=${page}`),request<Person[]>(`/projects/${id}/members`),request<unknown[]>(`/projects/${id}/audit`)]);if(sequence!==loadSequence.current)return;setTasks(t.items);setTotal(t.total);setMembers(m);setHistory(h);}}
  async function act(fn:()=>Promise<unknown>,message:string){if(busy)return;setBusy(true);setError('');setNotice('');try{await fn();setNotice(message);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
  useEffect(()=>{request<Me>('/me').then(setMe).catch(()=>{}).finally(()=>setChecking(false));},[]);
- useEffect(()=>{if(me)load().catch(e=>setError(e.message));},[me,selected,offset]); // Requests are read-only; edits always include the stored revision.
+ useEffect(()=>{setTasks([]);setMembers([]);setHistory([]);setTotal(0);if(me)load().catch(e=>setError(e.message));return()=>{loadSequence.current++;};},[me,selected,offset]); // Requests are read-only; edits always include the stored revision.
  useEffect(()=>{if(me?.role==='ADMIN')Promise.all([request<Person[]>('/admin/users'),request<{maintenance:boolean;reason:string}>('/admin/operations')]).then(([u,o])=>{setUsers(u);setOperations(o);}).catch(e=>setError(e.message));},[me,screen]);
  const form=(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();return new FormData(e.currentTarget);};
  if(checking)return <main className="work-app">Checking session…</main>;

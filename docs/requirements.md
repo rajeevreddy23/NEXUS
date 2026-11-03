@@ -1,5 +1,7 @@
 # Requirements traceability
 
+The real application extension is described in [real-application.md](real-application.md). It adds a separate persistent Java Tasks service, actual account and project workflows, an operational-state adapter, isolated same-build recovery validation, and a narrowly approved traffic-resumption runbook. The original microservices remain as a regression laboratory. The cloud workflow now requires both PostgreSQL suites to execute and checks the real app independently; completion must follow the latest run's evidence.
+
 Source: `NEXUS_Aligned_Complete (1).pptx` found in the user's Downloads directory on 27 October 2026. The original workspace was empty. The prior conversation was readable but exposed reference placeholders rather than the earlier long project prompts. The presentation and current explicit user request therefore define the baseline.
 
 | Requirement | Implementation | Validation / limitation |

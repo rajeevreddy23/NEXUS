@@ -4,7 +4,7 @@
 
 The `feat/real-application` extension adds a separate **NEXUS Tasks** Java application: database accounts, project membership, tasks, assignments, edit revisions, audit history and operational maintenance. See [real application setup and acceptance](docs/real-application.md). Run `node scripts/setup.mjs`, then `docker compose -f compose.application.yaml up --build -d`. Open `/work` for the application and `/` for the NEXUS control room. The original Compose file remains the isolated microservices test laboratory. The two stacks share port 3000, so run one at a time.
 
-An academic reliability platform for **root-cause diagnosis and developer-approved recovery** in a small cloud-native demo. The baseline is the supplied Mohan Babu University presentation, preserved in [docs/NEXUS-baseline.pptx](docs/NEXUS-baseline.pptx) and extracted in [docs/presentation-baseline.md](docs/presentation-baseline.md).
+An evidence-based reliability platform for **root-cause diagnosis and developer-approved recovery**, with a real Java Tasks application and an isolated microservice laboratory. The baseline is the supplied Mohan Babu University presentation, preserved in [docs/NEXUS-baseline.pptx](docs/NEXUS-baseline.pptx) and extracted in [docs/presentation-baseline.md](docs/presentation-baseline.md).
 
 **Frontend:** Next.js, React, TypeScript, Tailwind, React Flow. **Backend and demo services:** Java 21, Spring Boot 3.5.7. **AI:** Spring AI 1.1.0 with bounded Java role orchestration. **Storage:** PostgreSQL 17 + PGvector. **Observability:** Micrometer/Prometheus, OpenTelemetry Java agent/Collector, Jaeger, Loki. No Python backend or Python tooling is needed.
 

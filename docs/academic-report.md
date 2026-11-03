@@ -14,6 +14,10 @@ Small development teams may lack dedicated reliability engineers. During an inci
 
 ## Objectives and scope
 
+### Real application extension
+
+Following the initial pilot, a separate Java Tasks application was added as an actual monitored system. It persists accounts, project memberships, task assignments, optimistic edit revisions, administrative maintenance and business audit events in PostgreSQL. The NEXUS console observes this application through authenticated operational endpoints and the telemetry collectors. Maintenance resumption is the only approved operational runbook; database outages require manual investigation. The same application build is tested against a separate database before a developer approves the live change. This extension does not turn controlled maintenance recovery into proof of arbitrary infrastructure repair. Its acceptance evidence is tracked separately from the earlier synthetic-fault trials in the verification ledger.
+
 The implementation monitors a fixed three-service Java application, opens incidents from repeated anomalous observations, retrieves historical records, produces cited findings and plans, tests supported actions in isolation, requires approval and verifies recovery. It supports error responses, latency and connection-pool exhaustion. It retains attempted fixes, outcomes, and suggested preventive actions.
 
 The implementation does not claim unrestricted autonomous repair. The recovery policy is deliberately narrow and deterministic. Automatic cluster discovery, learned anomaly models, source-code patches, container restart/scaling, cloud administration and enterprise identity management are outside this deliverable. Resource measurements are actual application signals; broad production failure coverage is not implied by the three injected scenarios.

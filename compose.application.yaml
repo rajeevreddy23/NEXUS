@@ -81,6 +81,7 @@ services:
       LOKI_URL: http://loki:3100
       JAEGER_URL: http://jaeger:16686
       AI_ENABLED: ${AI_ENABLED:-false}
+      COLLECTORS_ENABLED: ${COLLECTORS_ENABLED:-true}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       CHAT_MODEL: ${CHAT_MODEL:-nvidia/nemotron-3-ultra-550b-a55b:free}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-nvidia/nemotron-3.5-embed-1b:free}

@@ -2,6 +2,7 @@
 import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import assert from 'node:assert/strict';
+import {randomUUID} from 'node:crypto';
 if(process.env.NEXUS_DISPOSABLE_TESTS!=='true')throw Error('Run only against disposable test databases: set NEXUS_DISPOSABLE_TESTS=true explicitly');
 const env=Object.fromEntries(readFileSync('.env','utf8').split(/\r?\n/).filter(l=>l.includes('=')).map(l=>{let i=l.indexOf('=');return [l.slice(0,i),l.slice(i+1)];}));
 const results=[];mkdirSync('evidence',{recursive:true});
@@ -49,4 +50,8 @@ try{
  try{execFileSync('docker',['compose','exec','-T','tasks-db','pg_restore','-U','tasks','-d','nexus_restore_check','--exit-on-error'],{input:dump,stdio:['pipe','pipe','pipe'],timeout:90000});
  const restored=compose('exec','-T','tasks-db','psql','-U','tasks','-d','nexus_restore_check','-Atc',`select status from task where id='${t.id}'`).toString().trim();assert.equal(restored,'DONE');record('backup restored into independent database and business record verified');
  }finally{compose('exec','-T','tasks-db','dropdb','-U','tasks','nexus_restore_check');}
+ // Controlled crash fixture in a disposable database: startup must mark uncertain execution for review, never replay it.
+ for(const old of await dev('/incidents'))if(!['RESOLVED','CLOSED'].includes(old.status))await dev(`/incidents/${old.id}/close`,{reason:'Healthy baseline before interrupted-controller fixture'});
+ const interrupted=randomUUID();compose('exec','-T','postgres','psql','-U','nexus','-d','nexus','-v','ON_ERROR_STOP=1','-c',`insert into incident(id,service,status,evidence) values ('${interrupted}','tasks','EXECUTING','[]'::jsonb)`);
+ compose('restart','backend');await until(()=>login(dev,'developer',env.NEXUS_PASSWORD));const uncertain=await dev(`/incidents/${interrupted}`);assert.equal(uncertain.status,'RECOVERY_FAILED');assert.equal(uncertain.outcome.completionUnknown,true);assert((await dev(`/incidents/${interrupted}/audit`)).some(a=>a.event==='INTERRUPTED_ACTION_REQUIRES_REVIEW'));await dev(`/incidents/${interrupted}/close`,{reason:'Interrupted fixture inspected; no action was replayed'});record('controller restart never replays an uncertain action');
 }catch(e){console.error(e.message);process.exitCode=1;}

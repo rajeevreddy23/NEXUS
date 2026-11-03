@@ -1,5 +1,33 @@
 # Architecture and implementation decisions
 
+## Real application deployment
+
+`compose.application.yaml` deploys the control plane alongside a separate Java application. The browser reaches only the Next.js server on localhost; the two proxies have fixed destinations. Session credentials stay in HttpOnly cookies. The business service has its own account database and the sandbox has a different isolated database/network. Business audit records are distinct from incident audit records.
+
+```mermaid
+flowchart LR
+    Browser[Browser] --> UI[Next.js console and Tasks workspace]
+    UI -->|/api| Control[NEXUS Java control plane]
+    UI -->|/work-api| Tasks[Java Tasks application]
+    Tasks --> WorkDB[(Persistent business PostgreSQL)]
+    Control --> IncidentDB[(PostgreSQL + PGvector)]
+    Control -->|authenticated observations| Tasks
+    Control -->|isolated validation| Replica[Same Tasks build / recovery sandbox]
+    Replica --> ReplicaDB[(Isolated sandbox PostgreSQL)]
+    Control -->|bounded read-only roles| AI[Spring AI / OpenRouter]
+    Tasks --> OTel[OpenTelemetry Collector]
+    OTel --> Loki[Loki logs]
+    OTel --> Jaeger[Jaeger traces]
+    Prometheus[Prometheus metrics] --> Tasks
+    Control --> Prometheus & Loki & Jaeger
+```
+
+Only maintenance-based unavailability has a supported application runbook. Conditional operational-state updates close the check/action race: an administrator changing state after validation causes approval to abort before mutation. If the controller restarts during execution, startup marks the result uncertain and requires manual inspection without replaying the action. Interrupted validation resets to require a fresh run. This relies on the documented single-controller deployment; active-active controller leases are not implemented.
+
+Task/project updates use revision comparisons, and task mutations share-lock the project row so an archive cannot race a committed task write. Audit writes participate in the same transaction. Password hashes use BCrypt; administrator provisioning is explicit rather than public self-registration. Account and project visibility are enforced in Java and SQL, independently of the UI.
+
+## Original microservices laboratory
+
 ```mermaid
 flowchart LR
     Browser[Next.js console / React Flow] --> Proxy[Same-origin Next.js API proxy]

@@ -1,5 +1,36 @@
 # API reference
 
+## Real task application
+
+These routes belong to the separate Java Tasks service (`/api` there), exposed to the browser through `/work-api`. They are not NEXUS control-room routes. Form login, logout and CSRF work as below, using the separate `WORKSESSION` session and `WORK-XSRF-TOKEN` cookie. Read the CSRF token from `/work-api/csrf`, send `X-XSRF-TOKEN` on mutations, and refresh it after login/logout.
+
+| Method | Tasks route after `/work-api` | Permission / contract |
+|---|---|---|
+| GET | `/csrf` | Anonymous; `{token}` |
+| POST | `/login`, `/logout` | Form login / CSRF-protected session logout |
+| GET | `/me` | Signed-in database account `{id,username,role}` |
+| GET / POST | `/projects` | List visible projects / create `{name,description}` |
+| POST | `/projects/{id}/update` | Owner/admin; `{name,description,archived,version}` |
+| GET / POST | `/projects/{id}/members` | Read by member; owner/admin adds existing `{username}` |
+| GET | `/projects/{id}/tasks?limit=50&offset=0` | Member/admin; `{items,total,limit,offset}`, limit 1–200 |
+| POST | `/projects/{id}/tasks` | Member/admin; task payload below |
+| POST | `/tasks/{id}/update` | Member/admin; task payload and current revision |
+| GET | `/projects/{id}/audit` | Member/admin; newest 200 project/task events |
+| POST | `/password` | Account owner; `{currentPassword,newPassword}` |
+| GET / POST | `/admin/users` | ADMIN; list without hashes / provision `{username,password,role}` |
+| GET | `/admin/operations`, `/admin/audit` | ADMIN; operational state / latest 200 business events |
+| POST | `/admin/maintenance` | ADMIN; `{enabled,reason}` |
+
+Task payload: `{title,description,status,priority,assigneeId,dueDate,version}`. Status is TODO/IN_PROGRESS/DONE; priority LOW/MEDIUM/HIGH. Assignment is optional but must name an active project member. Due date is optional ISO date. Passwords contain 12–72 characters; usernames use 3–80 letters/digits/underscore/dot/hyphen. Optimistic revisions reject conflicting writes with 409. Archived projects reject task writes. Project deletion is represented by reversible archival; audit records are retained. Task editing and completion are supported; destructive task deletion is not exposed.
+
+Nonmembers receive 404 for project-scoped data; invalid fields/body/identifier return 400. Missing session is 401, role/CSRF rejection 403, duplicate username/conflicting revision 409, maintenance/database unavailability 503. Mutations are transactional with audit writes. Do not retry a timed-out create blindly: reload and check whether it was committed.
+
+Internal M2M routes `/ops/state`, `/ops/events`, `/ops/probe`, and POST `/ops/maintenance` require `X-Nexus-Token`. They are never forwarded by the frontend. The only operational mutation accepts `{enabled,expectedVersion}`; approval supplies a conditional version. `/actuator/metrics/**` uses the same token. Prometheus and health are reachable only on internal service networks. The deployment fixes the target URL through configuration; clients/models cannot supply arbitrary targets or commands.
+
+In application mode, control-room `/me` reports `applicationMode:true,demoEnabled:false`; the allowlisted target is `tasks`, with `RESUME_TRAFFIC` the only executable plan. Unsupported problems use `MANUAL_INVESTIGATION`.
+
+## NEXUS control room
+
 All application routes are under `/api`. The console uses the same-origin Next.js proxy. Cookies are HTTP session credentials; no token is stored in browser local storage. Mutations require `X-XSRF-TOKEN`, obtained from GET `/api/csrf`. After login/logout obtain a fresh token. Login uses URL-encoded fields; other mutations use JSON. GET routes require either role except CSRF; business mutations require DEVELOPER. Logout is the standard Spring Security session logout and is available to authenticated users of either role.
 
 | Method | Route | Request / response |
