@@ -71,6 +71,7 @@ jobs:
         if: env.NEXUS_AI_ONLY != 'true'
         env:
           NEXUS_DISPOSABLE_TESTS: 'true'
+          COLLECTORS_ENABLED: 'false'
         run: |
           docker compose down -v --remove-orphans
           export COMPOSE_FILE=compose.application.yaml:compose.application.ci.yaml
