@@ -1,0 +1,57 @@
+[
+  {
+    "check": "real authentication, roles and CSRF",
+    "passed": true,
+    "at": "2026-11-03T18:16:25.430Z"
+  },
+  {
+    "check": "project membership, task assignment, optimistic concurrency and audit",
+    "passed": true,
+    "at": "2026-11-03T18:16:25.908Z"
+  },
+  {
+    "check": "business data and accounts survive application restart",
+    "passed": true,
+    "at": "2026-11-03T18:16:44.917Z"
+  },
+  {
+    "check": "approval refuses changed live operational state",
+    "passed": true,
+    "at": "2026-11-03T18:16:48.878Z"
+  },
+  {
+    "check": "isolated validation, explicit approval, three live probes and historical memory",
+    "passed": true,
+    "at": "2026-11-03T18:16:51.057Z"
+  },
+  {
+    "check": "nonempty real Prometheus, Loki and Jaeger telemetry",
+    "passed": true,
+    "at": "2026-11-03T18:16:53.383Z"
+  },
+  {
+    "check": "archived projects reject writes",
+    "passed": true,
+    "at": "2026-11-03T18:16:53.500Z"
+  },
+  {
+    "check": "real database outage has no unsupported executable recovery",
+    "passed": true,
+    "at": "2026-11-03T18:17:02.411Z"
+  },
+  {
+    "check": "database reconnect preserves business records",
+    "passed": true,
+    "at": "2026-11-03T18:17:04.573Z"
+  },
+  {
+    "check": "backup restored into independent database and business record verified",
+    "passed": true,
+    "at": "2026-11-03T18:17:05.910Z"
+  },
+  {
+    "check": "controller restart never replays an uncertain action",
+    "passed": true,
+    "at": "2026-11-03T18:17:24.928Z"
+  }
+]

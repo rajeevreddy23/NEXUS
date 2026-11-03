@@ -2,7 +2,7 @@
 
 ## Real application extension
 
-A separate persistent Java Tasks application and operational recovery adapter have now been implemented. See [setup and behavior](real-application.md) and [API](api.md). Its new cloud acceptance must pass before it is reported as verified; previous demo results alone do not establish its correctness. Continuous hosting, real-world workload validation, broad statistical evaluation and institution-specific submission review remain separate from functional implementation.
+A separate persistent Java Tasks application and operational recovery adapter have been implemented and [passed full real application acceptance](https://github.com/rajeevreddy23/NEXUS/actions/runs/41691550077), including real browser workflows and an enabled provider/PGvector scenario. See [setup and behavior](real-application.md), [API](api.md), [evidence](verification.md) and [completion contract](acceptance-contract.md). No known functional acceptance blocker remains for this defined single-host scope. Continuous hosting, real-world workload validation, broad statistical evaluation and institution-specific submission review remain separate from functional implementation.
 
 ## Required controlled-demo acceptance
 

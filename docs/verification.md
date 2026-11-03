@@ -1,6 +1,30 @@
 # Verification ledger
 
-## Latest cloud status
+## Real application — 3 November 2026
+
+[Run 41691550077 passed](https://github.com/rajeevreddy23/NEXUS/actions/runs/41691550077) on code `100b7e9a132a6a88bc95608a5b1a3e9559a44ebf`. Reviewed artifacts are retained in [evidence/cloud-41691550077](evidence/cloud-41691550077/provenance.json); the downloaded ZIP hash matched GitHub's artifact digest.
+
+| Check | Measured result |
+|---|---|
+| Java | 42 total, 41 passed, 0 failures/errors, 1 opt-in provider unit smoke skipped; both real PostgreSQL suites executed |
+| Frontend | Production build and 5 console fixture tests passed |
+| Real browser | 2 passed: user-created project/task persisted after reload; actual Tasks graph without demo controls |
+| Business API | Authentication, roles, CSRF, membership isolation, assignment, conflicting edits, audit and archived-write rejection passed |
+| Persistence | Real accounts/tasks survived application restart and database outage/reconnect |
+| Operational recovery | Unvalidated/stale/observer/replayed approvals rejected; changed operational revision aborted; isolated validation and three post-action probes passed |
+| Telemetry | Nonempty actual Prometheus, Loki and Jaeger responses for Tasks |
+| Unsupported outage | Stopped PostgreSQL caused real unavailability and manual investigation; no unsupported action executed |
+| Backup | Business dump restored into a separate database and a stored completed task verified |
+| Interrupted execution | Controller restart marked a disposable EXECUTING fixture uncertain, with audit, and never replayed it |
+| Live Spring AI/PGvector | Three accepted cited provider roles, historical vector context, approved real-application recovery and new outcome vector retrieval passed |
+
+The live provider scenario was executed separately from the skipped opt-in Java provider smoke; there is no implied live success from that skip. Citation identity checks do not establish semantic correctness. This is a functional acceptance run, not a load or statistical accuracy study.
+
+The preceding [run 41687266645](https://github.com/rajeevreddy23/NEXUS/actions/runs/41687266645) passed the full original ERROR/LATENCY/DB_POOL laboratory acceptance and populated live browser before failing to package the newly added Tasks artifact. The packaging allowlist was fixed. Later runs caught an expired test session and an ambiguous browser test selector; their overall failures were not counted as complete success. The final green run repeated Java, frontend, the complete real application acceptance, both real browser checks and the provider integration. It intentionally skipped the unchanged laboratory deployment.
+
+No continuously hosted deployment was created. All CI containers and test volumes were removed after evidence capture. See [acceptance contract](acceptance-contract.md), [real application instructions](real-application.md) and [remaining work](remaining-work.md).
+
+## Earlier controlled-laboratory cloud status
 
 **Required controlled-demo runtime acceptance is verified.** The final targeted workflow [40564112317](https://github.com/rajeevreddy23/NEXUS/actions/runs/40564112317) passed on code `28ed2cc4d57e6298df3b5f8697dc269144ecb01f`. All containers and volumes were removed afterward. The repository remains private; no permanent hosting was created.
 

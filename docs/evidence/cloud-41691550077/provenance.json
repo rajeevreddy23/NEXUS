@@ -1,0 +1,7 @@
+{
+  "run": "https://github.com/rajeevreddy23/NEXUS/actions/runs/41691550077",
+  "testedCommit": "100b7e9a132a6a88bc95608a5b1a3e9559a44ebf",
+  "artifactId": 13257788695,
+  "archiveSha256": "77cb920834b20fddc54208f09d17905b399ee42bf9e25a0492dff849cfa37be2",
+  "scope": "Real application acceptance, all Java tests except opt-in provider unit smoke, five fixture tests, two real browser tests and one explicit live AI/PGvector integration. Original demo regression passed in run 41687266645, which later failed packaging the new application."
+}

@@ -1,0 +1,109 @@
+{
+  "at": "2026-11-03T18:14:03.695Z",
+  "suites": [
+    {
+      "name": "edu.nexus.AiGroundingTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.308
+    },
+    {
+      "name": "edu.nexus.ApplicationRecoveryServiceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.667
+    },
+    {
+      "name": "edu.nexus.DetectorTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.629
+    },
+    {
+      "name": "edu.nexus.DiagnosisWorkflowTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.167
+    },
+    {
+      "name": "edu.nexus.IncidentMemoryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.099
+    },
+    {
+      "name": "edu.nexus.OpenRouterConfigurationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.435
+    },
+    {
+      "name": "edu.nexus.OpenRouterLiveTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "seconds": 0
+    },
+    {
+      "name": "edu.nexus.PostgresIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 13.319
+    },
+    {
+      "name": "edu.nexus.RecoveryServiceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.77
+    },
+    {
+      "name": "edu.nexus.SecurityTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.25
+    },
+    {
+      "name": "edu.nexus.TelemetryHttpTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.55
+    },
+    {
+      "name": "edu.nexus.demo.DemoControllerTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.412
+    },
+    {
+      "name": "edu.nexus.work.WorkspaceIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 19.505
+    }
+  ]
+}

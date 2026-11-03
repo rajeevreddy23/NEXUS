@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-03T18:18:23.467Z",
+  "incidentId": "d68fa62c-47dc-4aa0-98ec-c2fc6e78cdb5",
+  "mode": "SPRING_AI_ASSISTED",
+  "acceptedRoles": 3,
+  "historicalVectorContext": true,
+  "newOutcomeVectorRetrievable": true,
+  "recoveryVerified": true,
+  "claim": "Citation identity is verified; semantic correctness requires human review"
+}
