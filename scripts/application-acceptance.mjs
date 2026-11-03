@@ -16,7 +16,7 @@ function session(prefix){const cookies=new Map();let csrf;
  const r=await fetch('http://127.0.0.1:3000'+prefix+path,{method:body===undefined?'GET':'POST',headers,body:body===undefined?undefined:form?new URLSearchParams(body):JSON.stringify(body),redirect:'manual',signal:AbortSignal.timeout(120000)});
  for(const c of r.headers.getSetCookie()){const p=c.split(';')[0],i=p.indexOf('=');cookies.set(p.slice(0,i),p.slice(i+1));}
  if(status==='reject'){assert(r.status>=400&&r.status<500,`${path}: expected rejection, got ${r.status}`);return;}
- assert.equal(r.status,status,`${path}: unexpected response`);const data=r.status===204?null:await r.json();if(path==='/csrf')csrf=data.token;return data;
+ assert.equal(r.status,status,`${path}: expected HTTP ${status}, got ${r.status}`);const data=r.status===204?null:await r.json();if(path==='/csrf')csrf=data.token;return data;
  };}
 async function login(req,username,password){await req('/csrf');await req('/login',{username,password},204,true);await req('/csrf');return req('/me');}
 const admin=session('/work-api'),alice=session('/work-api'),bob=session('/work-api'),dev=session('/api'),observer=session('/api'),anon=session('/work-api');
@@ -29,7 +29,7 @@ try{
  const p=await alice('/projects',{name:'Release engineering',description:'Persistent project owned by Alice'});
  await bob(`/projects/${p.id}/tasks`,undefined,404);await bob(`/projects/${p.id}/members`,{username:'bob'},404);await alice(`/projects/${p.id}/members`,{username:'bob'});const members=await alice(`/projects/${p.id}/members`);const bobId=members.find(m=>m.username==='bob').id;
  const task={title:'Prepare release',description:'Review deployment and recovery evidence',status:'TODO',priority:'HIGH',assigneeId:bobId,dueDate:'2026-12-31',version:0};const t=await bob(`/projects/${p.id}/tasks`,task);await bob(`/tasks/${t.id}/update`,{...task,status:'DONE'});await alice(`/tasks/${t.id}/update`,task,409);assert.equal((await alice(`/projects/${p.id}/tasks`)).items[0].status,'DONE');assert((await alice(`/projects/${p.id}/audit`)).length>=4);record('project membership, task assignment, optimistic concurrency and audit');
- compose('restart','tasks');await until(()=>login(alice,'alice',password));await login(admin,'admin',env.WORK_ADMIN_PASSWORD);assert.equal((await alice(`/projects/${p.id}/tasks`)).items[0].status,'DONE');record('business data and accounts survive application restart');
+ compose('restart','tasks');await until(()=>login(alice,'alice',password));await login(bob,'bob',password);await login(admin,'admin',env.WORK_ADMIN_PASSWORD);assert.equal((await alice(`/projects/${p.id}/tasks`)).items[0].status,'DONE');record('business data and accounts survive application restart');
  await until(async()=>{await dev('/scan',{});assert((await dev('/services')).every(s=>s.snapshot?.healthy));});
  for(const i of await dev('/incidents'))if(!['RESOLVED','CLOSED'].includes(i.status))await dev(`/incidents/${i.id}/close`,{reason:'Disposable startup baseline is healthy'});
  const config=await dev('/me');assert.equal(config.applicationMode,true);assert.equal(config.demoEnabled,false);await dev('/demo/fault',{service:'tasks',mode:'ERROR'},'reject');
