@@ -1,0 +1,39 @@
+server:
+  port: ${PORT:8101}
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        name: WORKSESSION
+        http-only: true
+        same-site: strict
+        secure: ${COOKIE_SECURE:false}
+spring:
+  application:
+    name: ${SERVICE_NAME:tasks}
+  datasource:
+    url: ${WORK_DATABASE_URL:jdbc:postgresql://localhost:5432/tasks}
+    username: ${WORK_DB_USER:tasks}
+    password: ${WORK_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 8
+      connection-timeout: 2000
+  threads:
+    virtual:
+      enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
+work:
+  admin-user: ${WORK_ADMIN_USER:admin}
+  admin-password: ${WORK_ADMIN_PASSWORD}
+  operations-token: ${OPERATIONS_TOKEN}
+logging:
+  structured:
+    format:
+      console: logstash

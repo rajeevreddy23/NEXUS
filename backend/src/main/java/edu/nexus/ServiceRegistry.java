@@ -7,8 +7,13 @@ import static edu.nexus.Domain.*;
 class ServiceRegistry {
  final List<ServiceDef> services;
  final String sandbox;
- ServiceRegistry(@Value("${nexus.service-origin}") String origin,@Value("${nexus.sandbox-url}") String sandbox) {
+ final boolean applicationMode;
+ ServiceRegistry(String origin,String sandbox){this(origin,sandbox,"demo");}
+ @org.springframework.beans.factory.annotation.Autowired
+ ServiceRegistry(@Value("${nexus.service-origin}") String origin,@Value("${nexus.sandbox-url}") String sandbox,@Value("${nexus.mode:demo}")String mode) {
   this.sandbox=sandbox;
+  this.applicationMode=mode.equals("application");
+  if(applicationMode){services=List.of(new ServiceDef("tasks",origin,List.of()));return;}
   // Deliberately fixed allowlist. No request may supply a URL or shell command.
   if(origin.equals("http://demo")) services=List.of(new ServiceDef("orders","http://orders:8091",List.of("payments")),
    new ServiceDef("payments","http://payments:8092",List.of("inventory")),new ServiceDef("inventory","http://inventory:8093",List.of()));

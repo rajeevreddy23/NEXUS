@@ -28,6 +28,8 @@ management:
     health:
       show-details: never
 nexus:
+  mode: ${NEXUS_MODE:demo}
+  operations-token: ${OPERATIONS_TOKEN:}
   developer-user: ${NEXUS_USER:developer}
   developer-password: ${NEXUS_PASSWORD}
   observer-password: ${OBSERVER_PASSWORD}

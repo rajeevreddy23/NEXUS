@@ -9,6 +9,8 @@ FROM java-runtime AS backend
 COPY --chown=nexus:nexus backend/target/backend-1.0.0.jar /app/app.jar
 FROM java-runtime AS demo
 COPY --chown=nexus:nexus demo/target/demo-1.0.0.jar /app/app.jar
+FROM java-runtime AS workload
+COPY --chown=nexus:nexus workload/target/workload-1.0.0.jar /app/app.jar
 FROM node:24-alpine AS frontend
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000

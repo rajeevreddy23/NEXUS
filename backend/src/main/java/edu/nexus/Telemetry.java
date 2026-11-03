@@ -15,13 +15,14 @@ class Telemetry {
  private final HttpClient client=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
  private final Json json; private final String token,prometheus,loki,jaeger;
  final Map<String,Snapshot> latest=new ConcurrentHashMap<>();
+ @Value("${nexus.operations-token:}") String operationsToken="";
  Telemetry(Json json,@Value("${nexus.demo-token}") String token,@Value("${nexus.prometheus-url}") String prometheus,
   @Value("${nexus.loki-url}") String loki,@Value("${nexus.jaeger-url}") String jaeger) {
   this.json=json;this.token=token;this.prometheus=prometheus;this.loki=loki;this.jaeger=jaeger;
  }
  JsonNode get(String url,boolean authenticated) throws Exception {
   var builder=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(4)).GET();
-  if(authenticated)builder.header("X-Demo-Token",token);
+  if(authenticated)builder.header("X-Demo-Token",token).header("X-Nexus-Token",operationsToken.isBlank()?token:operationsToken);
   var response=client.send(builder.build(),HttpResponse.BodyHandlers.ofString());
   if(response.statusCode()/100!=2)throw new IllegalStateException("HTTP "+response.statusCode());
   return json.mapper.readTree(response.body());
@@ -37,6 +38,12 @@ class Telemetry {
  boolean healthy(String base) {
   try { return "UP".equals(get(base+"/demo/probe",true).path("status").asText()); } catch(Exception e) {return false;}
  }
+ boolean applicationHealthy(String base){try{return "UP".equals(get(base+"/ops/probe",true).path("status").asText());}catch(Exception e){return false;}}
+ JsonNode maintenance(String base,boolean enabled,Integer expectedVersion)throws Exception{
+  var body=new LinkedHashMap<String,Object>();body.put("enabled",enabled);if(expectedVersion!=null)body.put("expectedVersion",expectedVersion);
+  var request=HttpRequest.newBuilder(URI.create(base+"/ops/maintenance")).timeout(Duration.ofSeconds(5)).header("X-Nexus-Token",operationsToken.isBlank()?token:operationsToken).header("Content-Type","application/json").POST(HttpRequest.BodyPublishers.ofString(json.write(body))).build();
+  var response=client.send(request,HttpResponse.BodyHandlers.ofString());if(response.statusCode()/100!=2)throw new IllegalStateException("Operational action rejected: HTTP "+response.statusCode());return json.mapper.readTree(response.body());
+ }
  Evidence evidence(String source,Map<String,Object> data) {return new Evidence(UUID.randomUUID().toString(),source,Instant.now(),data);}
  private Evidence capture(String source,String url,boolean auth) {
   try {return evidence(source,Map.of("available",true,"payload",get(url,auth)));}
@@ -50,14 +57,15 @@ class Telemetry {
  Snapshot collect(ServiceDef service) {
   var evidence=new ArrayList<Evidence>();
   long started=System.nanoTime();
-  var health=capture("probe:"+service.id(),service.url()+"/demo/probe",true); evidence.add(health);
+  String prefix=service.id().equals("tasks")?"/ops":"/demo";
+  var health=capture("probe:"+service.id(),service.url()+prefix+"/probe",true); evidence.add(health);
   double latency=(System.nanoTime()-started)/1_000_000d;
   boolean healthy=Boolean.TRUE.equals(health.data().get("available")) && "UP".equals(json.mapper.valueToTree(health.data().get("payload")).path("status").asText());
-  var state=capture("state:"+service.id(),service.url()+"/demo/state",true);evidence.add(state);
+  var state=capture("state:"+service.id(),service.url()+prefix+"/state",true);evidence.add(state);
   Double cpu=metric(service.url(),"process.cpu.usage"), memory=metric(service.url(),"jvm.memory.used"),db=metric(service.url(),"hikaricp.connections.active");
   var values=new LinkedHashMap<String,Object>(); values.put("cpu",cpu);values.put("memoryBytes",memory);values.put("dbConnections",db);values.put("probeLatencyMs",latency);
   evidence.add(evidence("micrometer:"+service.id(),values));
-  evidence.add(capture("logs:"+service.id(),service.url()+"/demo/events",true));
+  evidence.add(capture("logs:"+service.id(),service.url()+prefix+"/events",true));
   String query="sum(rate(http_server_requests_seconds_count{application=\""+service.id()+"\",status=~\"5..\"}[1m])) / clamp_min(sum(rate(http_server_requests_seconds_count{application=\""+service.id()+"\"}[1m])), 0.001)";
   var prom=capture("prometheus:"+service.id(),prometheus+"/api/v1/query?query="+encode(query),false);evidence.add(prom);
   Double errorRate=null;

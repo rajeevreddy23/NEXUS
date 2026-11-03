@@ -1,0 +1,140 @@
+name: nexus-application
+x-otel: &otel
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+  OTEL_METRICS_EXPORTER: none
+  OTEL_LOGS_EXPORTER: otlp
+  OTEL_TRACES_EXPORTER: otlp
+  OTEL_TRACES_SAMPLER: always_on
+x-java: &java
+  restart: unless-stopped
+  read_only: true
+  tmpfs: [/tmp]
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  mem_limit: 768m
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment: {POSTGRES_DB: nexus, POSTGRES_USER: nexus, POSTGRES_PASSWORD: '${DB_PASSWORD:?Run node scripts/setup.mjs}'}
+    volumes: [nexus-db:/var/lib/postgresql/data]
+    networks: [control]
+    healthcheck: {test: ['CMD-SHELL', 'pg_isready -U nexus -d nexus'], interval: 5s, timeout: 3s, retries: 20}
+    restart: unless-stopped
+  tasks-db:
+    image: postgres:17-alpine
+    environment: {POSTGRES_DB: tasks, POSTGRES_USER: tasks, POSTGRES_PASSWORD: '${WORK_DB_PASSWORD:?Run node scripts/setup.mjs}'}
+    volumes: [tasks-db:/var/lib/postgresql/data]
+    networks: [application]
+    healthcheck: {test: ['CMD-SHELL', 'pg_isready -U tasks -d tasks'], interval: 5s, timeout: 3s, retries: 20}
+    restart: unless-stopped
+  sandbox-db:
+    image: postgres:17-alpine
+    environment: {POSTGRES_DB: sandbox, POSTGRES_USER: sandbox, POSTGRES_PASSWORD: '${SANDBOX_DB_PASSWORD:?Run node scripts/setup.mjs}'}
+    networks: [sandbox]
+    healthcheck: {test: ['CMD-SHELL', 'pg_isready -U sandbox -d sandbox'], interval: 5s, timeout: 3s, retries: 20}
+    restart: unless-stopped
+  tasks:
+    <<: *java
+    build: {context: ., dockerfile: Dockerfile.java, target: workload}
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: tasks
+      WORK_DATABASE_URL: jdbc:postgresql://tasks-db:5432/tasks
+      WORK_DB_PASSWORD: ${WORK_DB_PASSWORD}
+      WORK_ADMIN_PASSWORD: ${WORK_ADMIN_PASSWORD}
+      OPERATIONS_TOKEN: ${OPERATIONS_TOKEN:?Run node scripts/setup.mjs}
+    depends_on:
+      tasks-db: {condition: service_healthy}
+    networks: [application, telemetry]
+  recovery-sandbox:
+    <<: *java
+    build: {context: ., dockerfile: Dockerfile.java, target: workload}
+    environment:
+      WORK_DATABASE_URL: jdbc:postgresql://sandbox-db:5432/sandbox
+      WORK_DB_USER: sandbox
+      WORK_DB_PASSWORD: ${SANDBOX_DB_PASSWORD}
+      WORK_ADMIN_PASSWORD: ${WORK_ADMIN_PASSWORD}
+      OPERATIONS_TOKEN: ${OPERATIONS_TOKEN}
+      OTEL_SDK_DISABLED: 'true'
+    depends_on:
+      sandbox-db: {condition: service_healthy}
+    networks: [sandbox]
+  backend:
+    <<: *java
+    build: {context: ., dockerfile: Dockerfile.java, target: backend}
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: nexus-control
+      DATABASE_URL: jdbc:postgresql://postgres:5432/nexus
+      DB_PASSWORD: ${DB_PASSWORD}
+      NEXUS_USER: ${NEXUS_USER:-developer}
+      NEXUS_PASSWORD: ${NEXUS_PASSWORD}
+      OBSERVER_PASSWORD: ${OBSERVER_PASSWORD}
+      DEMO_TOKEN: ${DEMO_TOKEN}
+      DEMO_ENABLED: 'false'
+      NEXUS_MODE: application
+      OPERATIONS_TOKEN: ${OPERATIONS_TOKEN}
+      SERVICE_ORIGIN: http://tasks:8101
+      SANDBOX_URL: http://recovery-sandbox:8101
+      PROMETHEUS_URL: http://prometheus:9090
+      LOKI_URL: http://loki:3100
+      JAEGER_URL: http://jaeger:16686
+      AI_ENABLED: ${AI_ENABLED:-false}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CHAT_MODEL: ${CHAT_MODEL:-nvidia/nemotron-3-ultra-550b-a55b:free}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-nvidia/nemotron-3.5-embed-1b:free}
+      AI_BASE_URL: ${AI_BASE_URL:-https://openrouter.ai/api}
+    depends_on:
+      postgres: {condition: service_healthy}
+      tasks: {condition: service_started}
+      recovery-sandbox: {condition: service_started}
+    networks: [control, application, sandbox, telemetry, egress]
+  frontend:
+    build: ./frontend
+    environment: {BACKEND_URL: 'http://backend:8080', WORKLOAD_URL: 'http://tasks:8101'}
+    ports: ['127.0.0.1:3000:3000']
+    depends_on: [backend, tasks]
+    networks: [control, application, web-edge]
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+  prometheus:
+    image: prom/prometheus:v3.7.2
+    volumes: ['./infra/prometheus.application.yml:/etc/prometheus/prometheus.yml:ro',prometheus-data:/prometheus]
+    ports: ['127.0.0.1:9090:9090']
+    networks: [telemetry, monitor-edge]
+    restart: unless-stopped
+  jaeger:
+    image: jaegertracing/all-in-one:1.76.0
+    environment: {COLLECTOR_OTLP_ENABLED: 'true'}
+    ports: ['127.0.0.1:16686:16686']
+    networks: [telemetry, monitor-edge]
+    restart: unless-stopped
+  loki:
+    image: grafana/loki:3.5.7
+    command: [-config.file=/etc/loki/config.yaml]
+    volumes: ['./infra/loki.yml:/etc/loki/config.yaml:ro',loki-data:/loki]
+    ports: ['127.0.0.1:3100:3100']
+    networks: [telemetry, monitor-edge]
+    restart: unless-stopped
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.137.0
+    command: [--config=/etc/otelcol/config.yaml]
+    volumes: ['./infra/otel-collector.yml:/etc/otelcol/config.yaml:ro']
+    networks: [telemetry]
+    depends_on: [loki,jaeger]
+    restart: unless-stopped
+networks:
+  control: {internal: true}
+  application: {internal: true}
+  sandbox: {internal: true}
+  telemetry: {internal: true}
+  egress: {}
+  web-edge: {}
+  monitor-edge: {}
+volumes:
+  nexus-db: {}
+  tasks-db: {}
+  prometheus-data: {}
+  loki-data: {}

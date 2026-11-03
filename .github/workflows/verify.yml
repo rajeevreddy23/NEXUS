@@ -65,6 +65,19 @@ jobs:
       - name: Redacted failure diagnostics
         if: failure()
         run: node scripts/diagnostics.mjs
+      - name: Real application stack and acceptance
+        if: env.NEXUS_AI_ONLY != 'true'
+        run: |
+          docker compose down -v --remove-orphans
+          export COMPOSE_FILE=compose.application.yaml:compose.application.ci.yaml
+          docker compose config --quiet
+          docker compose up --build -d
+          node scripts/application-acceptance.mjs
+          cd frontend
+          npx playwright test --config playwright.application.config.ts
+      - name: Real application cleanup
+        if: always()
+        run: docker compose -f compose.application.yaml -f compose.application.ci.yaml down -v --remove-orphans
       - name: Remove ephemeral containers and data
         if: always()
         run: docker compose down -v --remove-orphans

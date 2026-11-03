@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(controllers=ApiController.class,properties={"nexus.developer-user=developer","nexus.developer-password=developer-test-password","nexus.observer-password=observer-test-password","nexus.demo-enabled=true"})
 @Import(SecurityConfig.class)
 class SecurityTest {
+ @MockitoBean ApplicationRecoveryService applicationRecovery;
  @Autowired MockMvc mvc;
  @MockitoBean IncidentStore store;@MockitoBean ServiceRegistry registry;@MockitoBean Telemetry telemetry;@MockitoBean Detector detector;@MockitoBean RecoveryService recovery;@MockitoBean IncidentMemory memory;@MockitoBean DiagnosisWorkflow workflow;
  @Test void anonymousCannotReadIncidents()throws Exception{mvc.perform(get("/api/incidents")).andExpect(status().isUnauthorized());}

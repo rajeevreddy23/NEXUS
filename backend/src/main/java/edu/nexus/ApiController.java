@@ -13,7 +13,8 @@ class ApiController {
  final IncidentStore store;final ServiceRegistry registry;final Telemetry telemetry;final Detector detector;final RecoveryService recovery;final IncidentMemory memory;final DiagnosisWorkflow workflow;final boolean demo;
  ApiController(IncidentStore store,ServiceRegistry registry,Telemetry telemetry,Detector detector,RecoveryService recovery,IncidentMemory memory,DiagnosisWorkflow workflow,@Value("${nexus.demo-enabled}") boolean demo){this.store=store;this.registry=registry;this.telemetry=telemetry;this.detector=detector;this.recovery=recovery;this.memory=memory;this.workflow=workflow;this.demo=demo;}
  @GetMapping("/csrf") Map<String,String> csrf(CsrfToken token){return Map.of("token",token.getToken(),"headerName",token.getHeaderName());}
- @GetMapping("/me") Map<String,Object> me(Authentication a){return Map.of("username",a.getName(),"roles",a.getAuthorities(),"demoEnabled",demo);}
+ @org.springframework.beans.factory.annotation.Autowired ApplicationRecoveryService applicationRecovery;
+ @GetMapping("/me") Map<String,Object> me(Authentication a){return Map.of("username",a.getName(),"roles",a.getAuthorities(),"demoEnabled",demo&&!registry.applicationMode,"applicationMode",registry.applicationMode);}
  @GetMapping("/services") List<Map<String,Object>> services(){return registry.services.stream().map(s->{var row=new LinkedHashMap<String,Object>();row.put("id",s.id());row.put("dependencies",s.dependencies());row.put("snapshot",telemetry.latest.get(s.id()));return (Map<String,Object>)row;}).toList();}
  @GetMapping("/incidents") List<Incident> incidents(){return store.list();}
  @GetMapping("/incidents/{id}") Incident incident(@PathVariable UUID id){return store.get(id);}
@@ -27,10 +28,10 @@ class ApiController {
   if(!demo)throw new IllegalStateException("Demo controls disabled");var target=registry.require(fault.service());
   var response=telemetry.control(target.url(),fault.mode());store.audit(null,actor.getName(),"DEMO_FAULT",Map.of("service",fault.service(),"mode",fault.mode()));return Map.of("state",response);
  }
- @PostMapping("/incidents/{id}/validate") Incident validate(@PathVariable UUID id,Principal actor){return recovery.validate(id,actor.getName());}
- @PostMapping("/incidents/{id}/revalidate") Incident revalidate(@PathVariable UUID id,Principal actor){return recovery.revalidate(id,actor.getName());}
+ @PostMapping("/incidents/{id}/validate") Incident validate(@PathVariable UUID id,Principal actor){return registry.applicationMode?applicationRecovery.validate(id,actor.getName()):recovery.validate(id,actor.getName());}
+ @PostMapping("/incidents/{id}/revalidate") Incident revalidate(@PathVariable UUID id,Principal actor){return registry.applicationMode?applicationRecovery.revalidate(id,actor.getName()):recovery.revalidate(id,actor.getName());}
  record Approval(@Min(0) int version,@AssertTrue boolean confirmed) {}
- @PostMapping("/incidents/{id}/approve") Incident approve(@PathVariable UUID id,@Valid @RequestBody Approval approval,Principal actor){return recovery.approve(id,approval.version(),actor.getName());}
+ @PostMapping("/incidents/{id}/approve") Incident approve(@PathVariable UUID id,@Valid @RequestBody Approval approval,Principal actor){return registry.applicationMode?applicationRecovery.approve(id,approval.version(),actor.getName()):recovery.approve(id,approval.version(),actor.getName());}
  record Closure(@NotBlank @Size(max=1000) String reason) {}
  @PostMapping("/incidents/{id}/close") Incident close(@PathVariable UUID id,@Valid @RequestBody Closure closure,Principal actor){return recovery.close(id,actor.getName(),closure.reason());}
  @PostMapping("/incidents/{id}/investigate") Incident investigate(@PathVariable UUID id,Principal actor){if(!store.get(id).status().equals("DETECTED"))throw new IllegalStateException("Only detected incidents may be investigated");workflow.investigate(id);return store.get(id);}

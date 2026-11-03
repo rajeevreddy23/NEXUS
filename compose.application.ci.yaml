@@ -1,0 +1,9 @@
+services:
+  backend:
+    build: {context: ., dockerfile: Dockerfile.ci, target: backend}
+  tasks:
+    build: {context: ., dockerfile: Dockerfile.ci, target: workload}
+  recovery-sandbox:
+    build: {context: ., dockerfile: Dockerfile.ci, target: workload}
+  frontend:
+    build: {context: ., dockerfile: Dockerfile.ci, target: frontend}
