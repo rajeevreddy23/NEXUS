@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-04T03:38:55.913Z",
+  "incidentId": "4469112c-94a0-4077-a75e-839fd9a7ee1c",
+  "mode": "SPRING_AI_ASSISTED",
+  "acceptedProviderRoles": 3,
+  "actualMaintenanceDetected": true,
+  "automatedRecoveryRejected": true,
+  "memoryRetrieved": true,
+  "vectorRetrieved": true
+}

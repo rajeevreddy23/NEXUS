@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-04T03:44:05.621Z",
+  "url": "https://nexus-console-rajeev23.vercel.app",
+  "vercelDeployment": "dpl_FQZRvCWVxDHC5U81huMkdak24Pwe",
+  "frontendSourceCommit": "561cbab4694b15d4e3cf73c26c7af1edd1bb4118",
+  "javaSourceCommit": "bf22dcfdff730c42872d6eb933afd8a27027c7a9",
+  "renderServices": [
+    "srv-dbla826417fc73fus480",
+    "srv-dbla89e417fc73fusrj0"
+  ],
+  "database": "dpg-dbl9l20u01pc739i6t80-a",
+  "plan": "Free evaluation; no paid resources",
+  "databaseExpires": "2026-12-04",
+  "browserTestsPassed": 2,
+  "scope": "Real API and browser workflows, manual actual telemetry, three live Spring AI roles, actual PGvector retrieval; full collectors and automated recovery are intentionally not hosted"
+}

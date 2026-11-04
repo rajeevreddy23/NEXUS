@@ -1,5 +1,7 @@
 # Runtime evidence provenance
 
+`hosting-2026-11-04/` contains real public-site API checks, two passing browser checks, the live AI/PGvector result, final healthy state, and an inspected workspace screenshot. Its provenance distinguishes the Vercel frontend commit from the Render Java commit and documents the deliberately limited free hosting profile. No passwords, database connection strings, cookies or tokens are retained.
+
 `cloud-41691550077/` contains the reviewed real application evidence for code `100b7e9`: 41 passing Java tests with one separate opt-in smoke skipped; all eleven real API/failure checks; successful live provider/PGvector recovery; and a browser screenshot of actual persisted user-created work. The two real browser tests and five fixture tests passed in the linked workflow. `provenance.json` records the run, exact code and verified ZIP digest. This is separate from the earlier synthetic-laboratory evidence below. No secrets or provider bodies are retained.
 
 These files contain measured synthetic-demo results, not fixture telemetry. No environment files, cookies, authentication traces, provider keys or raw provider responses are included.

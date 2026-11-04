@@ -10,3 +10,4 @@ test-results/
 preview-access.json
 .vercel/
 **/.env*.local
+/evidence/

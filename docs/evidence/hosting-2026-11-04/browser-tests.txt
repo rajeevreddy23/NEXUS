@@ -1,0 +1,11 @@
+npm notice run nexus-console@1.0.0 npx
+npm notice run playwright test --config playwright.hosted.config.ts
+
+Running 2 tests using 1 worker
+
+(node:29100) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 application-tests\work.spec.ts:4:5 › real workspace saves projects and tasks and reloads persisted work (13.4s)
+  ok 2 application-tests\work.spec.ts:11:5 › control room monitors actual application without demo controls (3.1s)
+
+  2 passed (17.7s)

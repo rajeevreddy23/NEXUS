@@ -1,5 +1,11 @@
 # Verification ledger
 
+## Free online evaluation — 4 November 2026
+
+The [public application](https://nexus-console-rajeev23.vercel.app/work) and [control room](https://nexus-console-rajeev23.vercel.app/) are live on Vercel and Render Free. [Reviewed hosting evidence](evidence/hosting-2026-11-04/provenance.json) records actual sign-in/roles, project/task persistence, stale-write rejection, gateway enforcement, two real browser tests, manual telemetry, three live AI roles and retrieval of a real closed incident through PGvector. Final task access was restored, readiness passed at about 127 ms, and no anomalies remained in that observation. Eight focused Java checks and five local UI fixture tests passed for the hosting adaptation.
+
+This is the explicitly selected limited evaluation: separate schemas in one expiring database, manual collection, missing collectors labelled unavailable, and automated recovery rejected by the server. It does not replace the full isolated Docker acceptance below. No paid resources were provisioned; free services sleep and the database expires on 4 December 2026.
+
 ## Real application — 3 November 2026
 
 [Run 41691550077 passed](https://github.com/rajeevreddy23/NEXUS/actions/runs/41691550077) on code `100b7e9a132a6a88bc95608a5b1a3e9559a44ebf`. Reviewed artifacts are retained in [evidence/cloud-41691550077](evidence/cloud-41691550077/provenance.json); the downloaded ZIP hash matched GitHub's artifact digest.

@@ -1,5 +1,7 @@
 # NEXUS
 
+**Free online evaluation:** [Task application](https://nexus-console-rajeev23.vercel.app/work) · [NEXUS control room](https://nexus-console-rajeev23.vercel.app/). Real accounts, tasks, manual monitoring, AI diagnosis and vector memory were verified on 4 November 2026. Free services sleep when idle and the database expires on **4 December 2026**. Full external collectors and isolated automated recovery are not hosted in this evaluation. See [hosting scope and evidence](docs/free-hosting.md).
+
 ## Real monitored application
 
 **NEXUS Tasks** is a separate Java application with database accounts, project membership, tasks, assignments, edit revisions, audit history and operational maintenance. [Real application cloud acceptance passed](https://github.com/rajeevreddy23/NEXUS/actions/runs/41691550077), including 41 passing Java tests, two live browser checks and a real AI/PGvector recovery. See [setup and acceptance](docs/real-application.md) and the [completion contract](docs/acceptance-contract.md). Run `node scripts/setup.mjs`, then `docker compose -f compose.application.yaml up --build -d`. Open `/work` for the application and `/` for the NEXUS control room. The original Compose file remains the isolated microservices test laboratory. The two stacks share port 3000, so run one at a time. No permanent hosting or guarantee against every possible failure is implied.

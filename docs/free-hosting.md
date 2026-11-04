@@ -38,9 +38,9 @@ For both services use `plan=free`, region `singapore`, repository `https://githu
 
 Pass the existing model settings and key to the control service only if enabling AI. The provider remains optional and model failures must be labelled. Set `BACKEND_URL`, `WORKLOAD_URL`, and the server-only `NEXUS_GATEWAY_TOKEN` on Vercel Production and Preview. Set framework Next.js and Node 24.x. Keep environment files, pulled OIDC tokens and deployment credentials out of Git.
 
-## Current deployment gate
+## Connection setup
 
-The database's connection string is not returned by Render's connected tools. The saved `D:\NEXUS\.env` must contain a nonempty `RENDER_DATABASE_URL` copied from the database dashboard before the Java services can be configured. The temporary local setup page writes this value directly after validation. A chat reply alone does not save a connection string.
+Connection setup is complete. The database URL and application credentials are configured in the Render services; Vercel holds only the backend addresses and server-side gateway secret. Local copies remain in the ignored `.env` file. No credentials are included in Git or evidence.
 
 ## Online evaluation addresses
 
@@ -52,3 +52,11 @@ The database's connection string is not returned by Render's connected tools. Th
 The connection has been saved and both Java services have started against their separate schemas. The Vercel project uses Next.js, Node 24.x, and Singapore functions. Its stable hostname is a project domain and follows production. The generated deployment URL remains protected by Vercel Authentication. Existing local `WORK_ADMIN_PASSWORD` and `NEXUS_PASSWORD` are the application and control-room passwords respectively; they are not committed here.
 
 Do not publish a frontend-only success claim. After services are live, verify gateway rejection, actual sign-in/CSRF, account authorization, project/task creation and reload persistence, manual telemetry, unavailable-collector labels and recovery rejection. Record the real URLs and results here only after those checks pass.
+
+## Verified online results — 4 November 2026
+
+All of those checks passed against the public Vercel hostname and real Render services. Two Playwright browser tests also passed, including creating a project/task and retaining it after reload. An initial public-network connect timeout was fixed by increasing Java's connection allowance; the final readiness probe passed in approximately 127 ms, with no active anomalies and maintenance disabled.
+
+A labelled, temporary administrator maintenance action was detected and reviewed by all three live Spring AI roles. Automated recovery was correctly rejected. The administrator resumed traffic, the incident was closed with the actual outcome, and that outcome was retrieved through PGvector. Normal business access and health were verified afterward. See [saved evidence](evidence/hosting-2026-11-04/provenance.json). Eight focused Java hosting/telemetry checks and five local UI fixtures also passed. No load or high-availability claim is made.
+
+The database accepts internal Render connections; a direct external database query through the hosted connector was blocked by its allowlist. The allowlist was not weakened. Persistence evidence comes from actual API reads, audit records and real browser reloads against the Java application's PostgreSQL storage.

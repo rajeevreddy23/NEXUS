@@ -16,7 +16,7 @@ No known blocker remains for the implemented single-controller, three-service ac
 
 ## Hosting constraint
 
-No paid service, credits, overage setting or Render resource was created. All runtime test containers and volumes were deleted by CI. There is no permanent public URL. Continuous hosting of the complete persistent architecture, including isolated sandbox/database and real observability services, remains a separate infrastructure decision requiring suitable compute. Do not describe a GitHub Actions run as continuous hosting.
+No paid service, credits or overage setting was enabled. A [free online evaluation](free-hosting.md) is now running on Vercel Hobby and two Render Free web services with one free Postgres instance. It has real application workflows, manual telemetry, AI diagnosis and vector memory, but no hosted external collectors or isolated automated recovery. The database expires on 4 December 2026 and idle services sleep. Continuous hosting of the complete architecture remains a separate infrastructure decision requiring suitable compute. Earlier GitHub Actions environments were ephemeral and are not the online host.
 
 ## Deliberate limits
 

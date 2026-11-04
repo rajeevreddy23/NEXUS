@@ -1,0 +1,25 @@
+{
+  "base": "https://nexus-console-rajeev23.vercel.app",
+  "results": [
+    {
+      "check": "public Java endpoints reject gateway bypass",
+      "passed": true,
+      "at": "2026-11-04T03:35:49.673Z"
+    },
+    {
+      "check": "actual sign-in, session isolation and observer permissions",
+      "passed": true,
+      "at": "2026-11-04T03:36:06.957Z"
+    },
+    {
+      "check": "real project/task creation, reload persistence, stale-edit rejection and audit",
+      "passed": true,
+      "at": "2026-11-04T03:36:13.394Z"
+    },
+    {
+      "check": "real manual telemetry, honest missing collectors and server-enforced recovery restriction",
+      "passed": true,
+      "at": "2026-11-04T03:36:20.063Z"
+    }
+  ]
+}
