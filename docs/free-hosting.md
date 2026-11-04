@@ -42,4 +42,13 @@ Pass the existing model settings and key to the control service only if enabling
 
 The database's connection string is not returned by Render's connected tools. The saved `D:\NEXUS\.env` must contain a nonempty `RENDER_DATABASE_URL` copied from the database dashboard before the Java services can be configured. The temporary local setup page writes this value directly after validation. A chat reply alone does not save a connection string.
 
+## Online evaluation addresses
+
+- Application: `https://nexus-console-rajeev23.vercel.app/work`
+- Control room: `https://nexus-console-rajeev23.vercel.app/`
+- Protected Tasks service: `https://nexus-tasks-23.onrender.com` (`srv-dbla826417fc73fus480`).
+- Protected control service: `https://nexus-control-23.onrender.com` (`srv-dbla89e417fc73fusrj0`).
+
+The connection has been saved and both Java services have started against their separate schemas. The Vercel project uses Next.js, Node 24.x, and Singapore functions. Its stable hostname is a project domain and follows production. The generated deployment URL remains protected by Vercel Authentication. Existing local `WORK_ADMIN_PASSWORD` and `NEXUS_PASSWORD` are the application and control-room passwords respectively; they are not committed here.
+
 Do not publish a frontend-only success claim. After services are live, verify gateway rejection, actual sign-in/CSRF, account authorization, project/task creation and reload persistence, manual telemetry, unavailable-collector labels and recovery rejection. Record the real URLs and results here only after those checks pass.

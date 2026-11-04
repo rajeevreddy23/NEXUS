@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 @Component
 class Telemetry {
- private final HttpClient client=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
+ private final HttpClient client=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
  private final Json json; private final String token,prometheus,loki,jaeger;
  final Map<String,Snapshot> latest=new ConcurrentHashMap<>();
  @Value("${nexus.operations-token:}") String operationsToken="";
