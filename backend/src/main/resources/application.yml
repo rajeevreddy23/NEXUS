@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
   servlet:
     session:
       timeout: 30m
@@ -28,6 +28,7 @@ management:
     health:
       show-details: never
 nexus:
+  evaluation-enabled: ${EVALUATION_ENABLED:false}
   mode: ${NEXUS_MODE:demo}
   operations-token: ${OPERATIONS_TOKEN:}
   developer-user: ${NEXUS_USER:developer}

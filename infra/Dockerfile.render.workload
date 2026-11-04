@@ -1,0 +1,15 @@
+FROM maven:3.9.11-eclipse-temurin-21 AS build
+WORKDIR /workspace
+COPY pom.xml ./
+COPY backend/pom.xml backend/pom.xml
+COPY demo/pom.xml demo/pom.xml
+COPY workload/pom.xml workload/pom.xml
+RUN mvn -B -pl workload -am dependency:go-offline -DskipTests
+COPY workload/src workload/src
+RUN mvn -B -pl workload -am package -DskipTests
+FROM eclipse-temurin:21-jre-alpine
+RUN addgroup -S nexus && adduser -S nexus -G nexus
+WORKDIR /app
+COPY --from=build --chown=nexus:nexus /workspace/workload/target/workload-1.0.0.jar app.jar
+USER nexus
+ENTRYPOINT ["java","-XX:MaxRAMPercentage=50","-XX:MaxMetaspaceSize=160m","-jar","/app/app.jar"]

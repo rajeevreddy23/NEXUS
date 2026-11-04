@@ -1,0 +1,9 @@
+node_modules
+.next
+.env*
+tests
+live-tests
+application-tests
+test-results
+playwright-report
+*.log

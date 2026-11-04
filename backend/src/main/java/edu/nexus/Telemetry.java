@@ -16,12 +16,14 @@ class Telemetry {
  private final Json json; private final String token,prometheus,loki,jaeger;
  final Map<String,Snapshot> latest=new ConcurrentHashMap<>();
  @Value("${nexus.operations-token:}") String operationsToken="";
+ @Value("${EXTERNAL_TELEMETRY_ENABLED:true}") boolean externalTelemetry=true;
+ @Value("${TELEMETRY_TIMEOUT_SECONDS:4}") int timeoutSeconds=4;
  Telemetry(Json json,@Value("${nexus.demo-token}") String token,@Value("${nexus.prometheus-url}") String prometheus,
   @Value("${nexus.loki-url}") String loki,@Value("${nexus.jaeger-url}") String jaeger) {
   this.json=json;this.token=token;this.prometheus=prometheus;this.loki=loki;this.jaeger=jaeger;
  }
  JsonNode get(String url,boolean authenticated) throws Exception {
-  var builder=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(4)).GET();
+  var builder=HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(Math.max(1,Math.min(120,timeoutSeconds)))).GET();
   if(authenticated)builder.header("X-Demo-Token",token).header("X-Nexus-Token",operationsToken.isBlank()?token:operationsToken);
   var response=client.send(builder.build(),HttpResponse.BodyHandlers.ofString());
   if(response.statusCode()/100!=2)throw new IllegalStateException("HTTP "+response.statusCode());
@@ -46,6 +48,7 @@ class Telemetry {
  }
  Evidence evidence(String source,Map<String,Object> data) {return new Evidence(UUID.randomUUID().toString(),source,Instant.now(),data);}
  private Evidence capture(String source,String url,boolean auth) {
+  if(!externalTelemetry&&(source.startsWith("prometheus:")||source.startsWith("loki:")||source.startsWith("jaeger:")))return evidence(source,Map.of("available",false,"error","Collector is not hosted in the free evaluation deployment"));
   try {return evidence(source,Map.of("available",true,"payload",get(url,auth)));}
   catch(Exception ex) {return evidence(source,Map.of("available",false,"error",ex.getClass().getSimpleName()+": "+ex.getMessage()));}
  }
