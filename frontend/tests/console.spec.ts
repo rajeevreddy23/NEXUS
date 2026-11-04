@@ -34,7 +34,7 @@ test('observer cannot use demo mutation controls',async({page})=>{
 });
 test('mobile overview fits viewport',async({page})=>{
  await page.setViewportSize({width:390,height:844});await fixture(page);await page.goto('/');await expect(page.getByRole('heading',{name:'Service overview'})).toBeVisible();
- expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);await page.screenshot({path:'test-results/mobile-fixture.png',fullPage:true});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);await expect.poll(()=>page.locator('.graph').evaluate(graph=>{const box=graph.getBoundingClientRect();const nodes=[...graph.querySelectorAll('.react-flow__node')];return nodes.length===3&&nodes.every(node=>{const rect=node.getBoundingClientRect();return rect.left>=box.left-1&&rect.right<=box.right+1&&rect.top>=box.top-1&&rect.bottom<=box.bottom+1;});})).toBe(true);await page.screenshot({path:'test-results/mobile-fixture.png',fullPage:true});
 });
 test('unavailable backend shows actionable sign-in error',async({page})=>{
  await page.route('**/api/**',r=>r.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:'unavailable'})}));await page.goto('/');
