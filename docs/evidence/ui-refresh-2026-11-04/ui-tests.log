@@ -1,0 +1,19 @@
+npm notice run nexus-console@1.0.0 test
+npm notice run playwright test
+[WebServer] npm notice run nexus-console@1.0.0 start
+[WebServer] npm notice run node scripts/start.mjs
+[WebServer] (node:16372) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:14668) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\console.spec.ts:20:5 › empty overview labels real absence and renders dependency graph (643ms)
+  ok 2 tests\console.spec.ts:25:5 › approval requires review checkbox and sends revision plus explicit confirmation (903ms)
+  ok 3 tests\console.spec.ts:32:5 › observer cannot use demo mutation controls (427ms)
+  ok 4 tests\console.spec.ts:35:5 › mobile overview fits viewport (485ms)
+  ok 5 tests\console.spec.ts:39:5 › unavailable backend shows actionable sign-in error (417ms)
+  ok 6 tests\workspace.spec.ts:3:5 › workspace waits for task data, filters projects, and fits a mobile screen (636ms)
+
+  6 passed (7.9s)
