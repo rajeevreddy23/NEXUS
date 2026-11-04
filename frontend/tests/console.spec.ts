@@ -18,7 +18,7 @@ async function fixture(page:Page,role='DEVELOPER',withIncident=false){
  });
 }
 test('empty overview labels real absence and renders dependency graph',async({page})=>{
- await fixture(page);await page.goto('/');await expect(page.getByRole('heading',{name:'Your systems, in focus.'})).toBeVisible();
+ await fixture(page);await page.goto('/');await expect(page.getByRole('heading',{name:'Service overview'})).toBeVisible();
  await expect(page.getByText('No incidents to investigate')).toBeVisible();await expect(page.locator('.react-flow__node')).toHaveCount(3);
  await page.screenshot({path:'test-results/overview-fixture.png',fullPage:true});
 });
@@ -33,7 +33,7 @@ test('observer cannot use demo mutation controls',async({page})=>{
  await fixture(page,'OBSERVER');await page.goto('/');await page.getByRole('button',{name:'Demo lab'}).click();await expect(page.getByRole('button',{name:'Apply scenario'})).toBeDisabled();await expect(page.getByRole('button',{name:'Collect telemetry now'})).toBeDisabled();
 });
 test('mobile overview fits viewport',async({page})=>{
- await page.setViewportSize({width:390,height:844});await fixture(page);await page.goto('/');await expect(page.getByRole('heading',{name:'Your systems, in focus.'})).toBeVisible();
+ await page.setViewportSize({width:390,height:844});await fixture(page);await page.goto('/');await expect(page.getByRole('heading',{name:'Service overview'})).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);await page.screenshot({path:'test-results/mobile-fixture.png',fullPage:true});
 });
 test('unavailable backend shows actionable sign-in error',async({page})=>{

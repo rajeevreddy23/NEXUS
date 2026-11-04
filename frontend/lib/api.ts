@@ -6,7 +6,7 @@ export async function api<T>(path:string,body?:unknown):Promise<T>{
  return response.status===204?undefined as T:response.json();
 }
 export async function login(username:string,password:string){
- csrf=null;const c=await fetch('/api/csrf',{cache:'no-store'});if(!c.ok)throw new Error('Backend unavailable. Start the Docker Compose stack first.');csrf=(await c.json()).token;
+ csrf=null;const c=await fetch('/api/csrf',{cache:'no-store'});if(!c.ok)throw new Error('Backend unavailable. The service may be starting; please retry shortly.');csrf=(await c.json()).token;
  const response=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-XSRF-TOKEN':csrf!},body:new URLSearchParams({username,password})});csrf=null;
  if(!response.ok)throw new Error(response.status===401?'Incorrect username or password':'Sign-in unavailable. Check the backend connection.');
 }
